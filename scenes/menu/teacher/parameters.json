@@ -2,5 +2,5 @@
   "name": "JohnNiger",
   "texture": "objects\\hud_zomb.png",
   "sounds": ["zombie_deading", "perelom_kosti"],
-  "speech": [1, "menuFont"]
+  "speech": ["1", "menuFont", "3реплика", "menuFont"]
 }
