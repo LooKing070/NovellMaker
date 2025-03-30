@@ -1,0 +1,9 @@
+{
+  "scene_type": "baseScene",
+  "fon": "fon_settings.jpg",
+  "music": "uuuu_ch_fon.mp3",
+  "objects":
+  [["teacher", "Actor", [30, 30], [1, 1, 109, 32, 0]],
+    ["start_button", "Button",[30, 30], [1, 1, 109, 32, 0]]
+  ]
+}
