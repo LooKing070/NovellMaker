@@ -18,11 +18,15 @@ class Rendering(object):
 
         self.textures = {}
         self.fonts = {}
+        self.defaultFont = None
         self.buttonsCreator = ButtonsCreator()
 
         with open(f"{self._fontsPath}\\parameters.json") as fontsPar:
             for name, font in json.load(fontsPar).items():
-                self.fonts[name] = pygame.font.Font(f"{self._fontsPath}\\{font[0]}", font[1])
+                if "Font" in name:
+                    self.fonts[name] = pygame.font.Font(f"{self._fontsPath}\\{font[0]}", font[1])
+                else:
+                    self.defaultFont = self.fonts[font]
 
     def set_texture(self, texName, colorKey=False):
         if texName not in self.textures:
@@ -98,13 +102,11 @@ class TextPlane(pygame.sprite.Sprite):
 
 
 class Button(AnimatedSprite):
-    def __init__(self, tex, sounds, type: str, coords: tuple, parameters: tuple):
+    def __init__(self, tex, sounds, coords: tuple, parameters: tuple):
         super().__init__(tex, *parameters[:5])
         self.sounds = sounds
-        self.type = type
+        self.type = parameters[-1]
         self.rect.x, self.rect.y = coords
-        self.parameters = parameters[5:]
-        print(self.parameters)
         self.clicks = 0
 
     def __str__(self):
@@ -123,24 +125,24 @@ class Button(AnimatedSprite):
 
 
 class BindBox(Button):
-    def __init__(self, tex, sounds, type, coords, condition):
-        super().__init__(tex, sounds, type, coords, condition)
+    def __init__(self, tex, sounds, coords, condition):
+        super().__init__(tex, sounds, coords, condition[:6])
 
     def do(self):
         return
 
 
 class Lister(Button):
-    def __init__(self, tex, sounds, type, coords, parameters):
-        super().__init__(tex, sounds, type, coords, parameters)
+    def __init__(self, tex, sounds, coords, parameters):
+        super().__init__(tex, sounds, coords, parameters[:6])
 
     def do(self):
         return
 
 
 class SceneChooser(Button):
-    def __init__(self, tex, sounds, type, coords, parameters):
-        super().__init__(tex, sounds, type, coords, parameters)
+    def __init__(self, tex, sounds, coords, parameters):
+        super().__init__(tex, sounds, coords, parameters[:6])
         self.next = "scene"
 
     def do(self):  # возвращает имя сцены, на которую переключает
@@ -148,8 +150,9 @@ class SceneChooser(Button):
 
 
 class Actor(Button):
-    def __init__(self, tex, sounds, type, coords, condition):
-        super().__init__(tex, sounds, type, coords, condition)
+    def __init__(self, tex, sounds, coords, parameters):
+        super().__init__(tex, sounds, coords, parameters[:6])
+        fonts, self.events, self.speech = parameters[6:]
 
     def do(self):
         return
@@ -169,6 +172,6 @@ class ButtonsCreator(object):
 
     def create_button(self, texture, sounds, type, coords, parameters):
         if type in self.buttonTypes:
-            return self.buttonTypes[type](texture, sounds, type, coords, parameters)
+            return self.buttonTypes[type](texture, sounds, coords, parameters)
         else:
-            return self.buttonTypes["Button"](texture, sounds, type, coords, parameters)
+            return self.buttonTypes["Button"](texture, sounds, coords, parameters)

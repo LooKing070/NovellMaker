@@ -1,4 +1,5 @@
 {
   "menuFont": ["Molot.otf", 40],
-  "settingsFont": ["Molot.otf", 26]
+  "settingsFont": ["Molot.otf", 26],
+  "default": "menuFont"
 }

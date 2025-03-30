@@ -94,7 +94,7 @@ class SceneCreator(object):
             events, parameters, speech = {}, {}, {}
             for f in os.listdir(f"{path}\\{currentDir}"):
                 if ".json" in f:
-                    with open(f"{path}\\{currentDir}\\{f}", 'r') as file:
+                    with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="utf-8") as file:
                         if "events" in f:
                             events = {k: v for k, v in json.load(file).items()}
                         elif "parameters" in f:
@@ -110,5 +110,6 @@ class SceneCreator(object):
                                 speech[title].append(string)
             objects.append(self.render.buttonsCreator.create_button(self.render.set_texture(parameters["texture"]),
                                                                     parameters["sounds"], objectType, tuple(position),
-                                                                    (*animaParameters, parameters, events, speech)))
+                                                                    (*animaParameters, parameters["name"],
+                                                                     parameters["speech"], events, speech)))
         return newObjects
