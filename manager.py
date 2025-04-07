@@ -22,7 +22,6 @@ class Manager(object):
         self.sceneCreator = SceneCreator(self.screen, self.scenePath)
 
         self.scenes = {k: None for k in os.listdir(self.scenePath)}
-        print(self.scenes)
         self.scenes["menu"] = self.sceneCreator.load_scene("menu")
         self.scene = self.scenes["menu"]
         print(self.scenes)
@@ -72,3 +71,9 @@ class Manager(object):
 
     def end_scene(self, result=False):  # True - начать сцену, False - закончить сцену
         return 0
+
+    def choose_resolution(self, screen):
+        self.screen = screen
+        self.scene.screen = self.screen
+        return
+

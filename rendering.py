@@ -56,7 +56,7 @@ class Rendering(object):
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sheet, columns=0, rows=0, x=0, y=0, animationDelay=100):
+    def __init__(self, sheet, x=0, y=0, columns=0, rows=0, animationDelay=100):
         super().__init__()
         self.frames = []
         self.cut_sheet(sheet, columns, rows)
@@ -102,11 +102,10 @@ class TextPlane(pygame.sprite.Sprite):
 
 
 class Button(AnimatedSprite):
-    def __init__(self, tex, sounds, coords: tuple, parameters: tuple):
-        super().__init__(tex, *parameters[:5])
-        self.sounds = sounds
-        self.type = parameters[-1]
-        self.rect.x, self.rect.y = coords
+    def __init__(self, parameters: dict, events: dict, text: dict):
+        super().__init__(*parameters["texture"])
+        self.sounds = parameters["sounds"]
+        self.type = "None"
         self.clicks = 0
 
     def __str__(self):
@@ -125,24 +124,24 @@ class Button(AnimatedSprite):
 
 
 class BindBox(Button):
-    def __init__(self, tex, sounds, coords, condition):
-        super().__init__(tex, sounds, coords, condition[:6])
+    def __init__(self, parameters: dict, events: dict, text: dict):
+        super().__init__(parameters, events, text)
 
     def do(self):
         return
 
 
 class Lister(Button):
-    def __init__(self, tex, sounds, coords, parameters):
-        super().__init__(tex, sounds, coords, parameters[:6])
+    def __init__(self, parameters: dict, events: dict, text: dict):
+        super().__init__(parameters, events, text)
 
     def do(self):
         return
 
 
 class SceneChooser(Button):
-    def __init__(self, tex, sounds, coords, parameters):
-        super().__init__(tex, sounds, coords, parameters[:6])
+    def __init__(self, parameters: dict, events: dict, text: dict):
+        super().__init__(parameters, events, text)
         self.next = "scene"
 
     def do(self):  # возвращает имя сцены, на которую переключает
@@ -150,9 +149,8 @@ class SceneChooser(Button):
 
 
 class Actor(Button):
-    def __init__(self, tex, sounds, coords, parameters):
-        super().__init__(tex, sounds, coords, parameters[:6])
-        fonts, self.events, self.speech = parameters[6:]
+    def __init__(self, parameters: dict, events: dict, text: dict):
+        super().__init__(parameters, events, text)
 
     def do(self):
         return
@@ -170,8 +168,8 @@ class ButtonsCreator(object):
         self.buttonTypes = {"Button": Button, "BinBox": BindBox, "Lister": Lister, "CheBox": SceneChooser,
                             "Actor": Actor}
 
-    def create_button(self, texture, sounds, type, coords, parameters):
+    def create_button(self, type, parameters, events, text):
         if type in self.buttonTypes:
-            return self.buttonTypes[type](texture, sounds, coords, parameters)
+            return self.buttonTypes[type](parameters, events, text)
         else:
-            return self.buttonTypes["Button"](texture, sounds, coords, parameters)
+            return self.buttonTypes["Button"](parameters, events, text)

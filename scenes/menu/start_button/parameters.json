@@ -1,6 +1,6 @@
 {
   "name": "startButton",
-  "texture": "objects\\hud_zomb.png",
-  "sounds": ["zombie_deading", "perelom_kosti"],
+  "texture": ["hud\\button_start.jpg", 0, 0, 1, 1, 0],
+  "sounds": ["zombie_deading.mp3", "perelom_kosti.mp3"],
   "speech": [1, "menuFont"]
 }

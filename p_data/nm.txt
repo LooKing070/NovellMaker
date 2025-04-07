@@ -1,2 +1,3 @@
+resizable
 1280 920
 NovellMaker

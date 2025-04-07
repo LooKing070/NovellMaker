@@ -17,6 +17,7 @@ class Scene:
         self._music = music
         self.objects = pygame.sprite.Group()
         for obj in objects:
+            print(obj.rect.x, obj.rect.y)
             self.objects.add(obj)
         self.result = "PAUSED"
 
@@ -76,7 +77,7 @@ class SceneCreator(object):
         objects = []
         sceneType = ''
         path = f"{self.path}\\{sceneName}"
-        with open(f"{path}\\parameters.json") as par_file:
+        with open(f"{path}\\parameters.json", 'r', encoding="utf-8") as par_file:
             for key, value in json.load(par_file).items():
                 if key == "scene_type":
                     sceneType = value
@@ -90,7 +91,7 @@ class SceneCreator(object):
 
     def _load_objects(self, path: str, objects: list):  # Загрузка объектов (кнопок) в этой сцене
         newObjects = []
-        for currentDir, objectType, position, animaParameters in objects:
+        for currentDir, objectType in objects:
             events, parameters, speech = {}, {}, {}
             for f in os.listdir(f"{path}\\{currentDir}"):
                 if ".json" in f:
@@ -99,6 +100,9 @@ class SceneCreator(object):
                             events = {k: v for k, v in json.load(file).items()}
                         elif "parameters" in f:
                             parameters = {k: v for k, v in json.load(file).items()}
+                            parameters["texture"][0] = self.render.set_texture(parameters["texture"][0])
+                            for i in range(len(parameters["sounds"])):
+                                parameters["sounds"][i] = self.sounder.load_sound(parameters["sounds"][i])
                 elif ".txt" in f[-4:]:
                     with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="UTF8") as text:
                         for string in text.readlines():
@@ -108,8 +112,5 @@ class SceneCreator(object):
                                 speech[title] = []
                             else:
                                 speech[title].append(string)
-            objects.append(self.render.buttonsCreator.create_button(self.render.set_texture(parameters["texture"]),
-                                                                    parameters["sounds"], objectType, tuple(position),
-                                                                    (*animaParameters, parameters["name"],
-                                                                     parameters["speech"], events, speech)))
+            newObjects.append(self.render.buttonsCreator.create_button(objectType, parameters, events, speech))
         return newObjects
