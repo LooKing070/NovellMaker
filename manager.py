@@ -76,6 +76,7 @@ class Manager(object):
         self.screen = screen
         self.scene.screen = self.screen
         wPercent, hPercent = screen.get_width() / oldRes[0], screen.get_height() / oldRes[1]
+        self.scene.fon.update((wPercent, hPercent))
         self.scene.objects.update((wPercent, hPercent))
         return
 

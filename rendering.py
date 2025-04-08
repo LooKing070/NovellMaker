@@ -28,6 +28,11 @@ class Rendering(object):
                 else:
                     self.defaultFont = self.fonts[font]
 
+    def load_fon(self, texName, colorKey=False, cols=1, rows=1, animaD=1, sk=1280):
+        sheet = self.set_texture(texName, colorKey)
+        size = 1 + sheet.get_rect().w / sk
+        return Fon((sheet, 0, 0, cols, rows, animaD, size))
+
     def set_texture(self, texName, colorKey=False):
         if texName not in self.textures:
             tex = pygame.image.load(f"{self._texPath}\\{texName}")
@@ -110,6 +115,15 @@ class TextPlane(pygame.sprite.Sprite):
         self.image = self.font.render(*parameters)
         self.rect = self.image.get_rect()
         self.rect.topleft = coords
+
+
+class Fon(AnimatedSprite):
+    def __init__(self, textureParameters):
+        super().__init__(*textureParameters)
+
+    def update(self, size=()):
+        if size:
+            self.resize(size[0], size[1])
 
 
 class Button(AnimatedSprite):

@@ -13,16 +13,19 @@ class Scene:
         self.sceneName = sceneName
         self.screen = screen
         self.screenSize = self.screen.get_width(), self.screen.get_height()
-        self._fon = fon
+        self.fon = fon
         self._music = music
         self.objects = pygame.sprite.Group()
         for obj in objects:
             self.objects.add(obj)
         self.result = "PAUSED"
+        print(self.objects)
 
         self._music.play(-1)
 
     def show(self):  # Возвращает ЛОЖЬ для продолжения игры
+        self.fon.update()
+        self.screen.blit(self.fon.image, (0, 0))
         self.objects.draw(self.screen)
         return False
 
@@ -70,8 +73,7 @@ class SceneCreator(object):
         self.scenes = {"baseScene": Scene}
 
     def load_scene(self, sceneName: str = "menu"):
-        fon = pygame.sprite.Sprite()
-        fon.rect = self.screen.get_width(), self.screen.get_height()
+        fon = None
         music = None
         objects = []
         sceneType = ''
@@ -81,7 +83,9 @@ class SceneCreator(object):
                 if key == "scene_type":
                     sceneType = value
                 elif key == "fon":
-                    fon.image = self.render.set_texture(f"\\bg\\{value}")
+                    value[0] = f"\\bg\\{value[0]}"
+                    value += [False, 1, 1, 1, self.screen.get_width()]
+                    fon = self.render.load_fon(*value)
                 elif key == "music":
                     music = self.sounder.load_fon_music(value)
                 else:
