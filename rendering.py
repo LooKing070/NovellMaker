@@ -56,24 +56,35 @@ class Rendering(object):
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sheet, x=0, y=0, columns=0, rows=0, animationDelay=100):
+    def __init__(self, sheet, x=0, y=0, columns=1, rows=1, animationDelay=0, size=1):
         super().__init__()
         self.frames = []
-        self.cut_sheet(sheet, columns, rows)
+        self._cut_sheet(sheet, columns, rows)
+        self._size = size
+        self._savedFrames = self.frames[::]
         self.currentFrame = 0
         self.animationTimer, self.animationDelay = 0, animationDelay
         self.runAnim = False
         self.image = self.frames[self.currentFrame]
-        self.rect = self.rect.move(x, y)
 
-    def cut_sheet(self, sheet, columns, rows):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
-                                sheet.get_height() // rows)
+        self.rect = self.rect.move(x, y)
+        self.resize(1, 1)
+
+    def _cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
         for j in range(rows):
             for i in range(columns):
                 frame_location = (self.rect.w * i, self.rect.h * j)
                 self.frames.append(sheet.subsurface(pygame.Rect(
                     frame_location, self.rect.size)))
+
+    def resize(self, xCo, yCo):
+        for frame in range(len(self._savedFrames)):
+            sheet = self._savedFrames[frame]
+            self.frames[frame] = pygame.transform.scale(sheet, (sheet.get_width() * self._size * xCo,
+                                                                sheet.get_height() * self._size * yCo))
+        self.image = self.frames[self.currentFrame]
+        self.rect = self.image.get_rect()
 
     def do_anim(self, currentFrame=0, endFrame=0, object=None):
         if not endFrame: endFrame = len(self.frames) - 1
@@ -117,6 +128,10 @@ class Button(AnimatedSprite):
             self.clicks += 1
             return self.clicks
         return False
+
+    def update(self, size=()):
+        if size:
+            self.resize(size[0], size[1])
 
     def do(self):
         self.runAnim = True

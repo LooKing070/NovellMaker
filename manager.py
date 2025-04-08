@@ -72,8 +72,10 @@ class Manager(object):
     def end_scene(self, result=False):  # True - начать сцену, False - закончить сцену
         return 0
 
-    def choose_resolution(self, screen):
+    def choose_resolution(self, screen, oldRes):
         self.screen = screen
         self.scene.screen = self.screen
+        wPercent, hPercent = screen.get_width() / oldRes[0], screen.get_height() / oldRes[1]
+        self.scene.objects.update((wPercent, hPercent))
         return
 

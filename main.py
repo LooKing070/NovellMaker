@@ -9,10 +9,12 @@ def main():
     pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
     with open(os.path.abspath("p_data\\nm.txt"), 'r', encoding="UTF8") as nm_par:
-        if "resiz" in nm_par.readline().lower():  # sssx, vsync=1
-            screen = pygame.display.set_mode([int(i) for i in nm_par.readline().split()], pygame.RESIZABLE)
+        windowType = nm_par.readline().lower()
+        windowRes = [int(i) for i in nm_par.readline().split()]
+        if "resiz" in windowType:  # sssx, vsync=1
+            screen = pygame.display.set_mode(windowRes, pygame.RESIZABLE)
         else:
-            screen = pygame.display.set_mode([int(i) for i in nm_par.readline().split()], pygame.SCALED)
+            screen = pygame.display.set_mode(windowRes, pygame.SCALED)
         pygame.display.set_caption(nm_par.readline().rstrip())
         pygame.display.set_icon(Rendering.load_texture(os.path.abspath("textures\\NM_icon.png")))
 
@@ -30,7 +32,7 @@ def main():
                 running = False
             elif event.type == pygame.VIDEORESIZE:
                 vScreen = pygame.transform.scale(vScreen, event.size)
-                manager.choose_resolution(vScreen)
+                manager.choose_resolution(vScreen, windowRes)
         screen.blit(vScreen, (0, 0))
         pygame.display.flip()
         clock.tick(fps)

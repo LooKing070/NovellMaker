@@ -17,7 +17,6 @@ class Scene:
         self._music = music
         self.objects = pygame.sprite.Group()
         for obj in objects:
-            print(obj.rect.x, obj.rect.y)
             self.objects.add(obj)
         self.result = "PAUSED"
 
