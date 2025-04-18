@@ -129,8 +129,12 @@ class Fon(AnimatedSprite):
 class Button(AnimatedSprite):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(*parameters["texture"])
-        self.sounds = parameters["sounds"]
-        self.type = "None"
+        self._sounds = parameters["sounds"]
+        self.events = events
+        textFonts = parameters["speech"]
+        self.text = text
+        # self.name = TextPlane(parameters["name"])
+        self.type = parameters["name"]
         self.clicks = 0
 
     def __str__(self):
@@ -146,51 +150,46 @@ class Button(AnimatedSprite):
     def update(self, size=()):
         if size:
             self.resize(size[0], size[1])
+        else:
+            self.runAnim = True
 
-    def do(self):
-        self.runAnim = True
-        return
+    def do(self, event="on_click"):
+        result = None
+        if event in self.events:
+            if "on_" in event:
+                result = [self.do(eS) for eS in self.events[event]]
+            elif "show_" in event:
+                result = self.events[event]
+            elif "say_" in event:
+                result = self.text[self.events[event]]
+            elif "sound_" in event:
+                self._sounds[self.events[event]].play(-1)
+            elif "play_" in event:
+                for _ in range(self.events[event]):
+                    self.update()
+            elif event == "scene":
+                result = self.events[event]
+        return result
 
 
 class BindBox(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
 
-    def do(self):
-        return
-
 
 class Lister(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
-
-    def do(self):
-        return
-
-
-class SceneChooser(Button):
-    def __init__(self, parameters: dict, events: dict, text: dict):
-        super().__init__(parameters, events, text)
-        self.next = "scene"
-
-    def do(self):  # возвращает имя сцены, на которую переключает
-        return self.next
 
 
 class Actor(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
 
-    def do(self):
-        return
-
 
 class Dialog(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
-
-    def do(self):
-        return
 
 
 class ButtonsCreator(object):
@@ -202,8 +201,7 @@ class ButtonsCreator(object):
         return cls.__instance
 
     def __init__(self):
-        self.buttonTypes = {"Button": Button, "BinBox": BindBox, "Lister": Lister, "CheBox": SceneChooser,
-                            "Actor": Actor}
+        self.buttonTypes = {"Button": Button, "BinBox": BindBox, "Lister": Lister, "Actor": Actor}
 
     def create_button(self, type, parameters, events, text):
         if type in self.buttonTypes:

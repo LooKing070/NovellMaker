@@ -1,0 +1,5 @@
+{
+  "on_start": ["play_anim", "show_object"],
+  "on_click": ["play_anim", "say"],
+  "on_scene": ""
+}

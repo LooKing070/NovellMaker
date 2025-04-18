@@ -26,7 +26,7 @@ def main():
     while running:
         vScreen.fill((0, 0, 0))
         if manager.scene.show():
-            manager.end_scene()
+            pass
         for event in pygame.event.get():
             if event_check(manager, pygame.mouse.get_pos(), event) or event.type == pygame.QUIT:
                 running = False

@@ -14,7 +14,7 @@ def event_check(manager, mouse_x_y, event):  # если возвращает Fal
         if event.key == pygame.K_ESCAPE:
             if str(manager.scene) == "menu":
                 return True
-            manager.end_scene()
+            manager.choose_scene()
         elif str(manager.scene) == "game":
             if pygame.key.name(event.key).isdigit():
                 if 0 < int(pygame.key.name(event.key)) < 5:
@@ -35,7 +35,7 @@ def event_check(manager, mouse_x_y, event):  # если возвращает Fal
                 manager.scene.camera.direction[0] = 1
         elif str(manager.scene) == "Pause":
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-                manager.end_scene(True)
+                manager.choose_scene()
     elif event.type == pygame.KEYUP:
         if str(manager.scene) == "Game":
             if event.key == event.key == pygame.K_w:

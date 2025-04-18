@@ -1,2 +1,2 @@
-music;sounds;resolution;language;changeSlotBind;walkingBind;interactionBind;combatBind
-1;1;"768" "640";eng;"1" "2" "3" "4";"w" "a" "s" "d";mouse3;mouse1
+volume;resolution;interactionBind;saveBind
+0.95;768 640;mouse1;=

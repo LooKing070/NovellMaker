@@ -1,4 +1,5 @@
 {
-  "1": [1],
-  "2": [2, "play_anim", ""]
+  "on_click": ["play_anim", "on_scene"],
+  "scene": "testV",
+  "play_anim": 0
 }

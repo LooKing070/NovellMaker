@@ -22,8 +22,8 @@ class Manager(object):
         self.sceneCreator = SceneCreator(self.screen, self.scenePath)
 
         self.scenes = {k: None for k in os.listdir(self.scenePath)}
-        self.scenes["menu"] = self.sceneCreator.load_scene("menu")
-        self.scene = self.scenes["menu"]
+        self.scene = None
+        self.choose_scene()
         print(self.scenes)
 
     @staticmethod
@@ -52,25 +52,20 @@ class Manager(object):
                             playerLogin[key] = readed[login][column]
         return playerLogin
 
-    @staticmethod
-    def _improve_login_params(lp: dict, currLog: int):
-        logPar = {}
-        for key, value in lp.items():
-            logPar[key] = value[currLog]
-        return logPar
-
     def check_click(self, pos, objects):
         for button in objects:
-            if button.check_click(pos):  # проверка попадания по кнопке
-                if str(button) == "startButton":  # что делает конкретная кнопка
-                    self.end_scene(True)
-                else:
-                    button.do()
-                return button
-        return None
+            clicks = button.check_click(pos)
+            if clicks:  # проверка попадания по кнопке
+                result = button.do()
+                if type(result) == list:
+                    for dr in result:
+                        if dr in self.scenes:
+                            self.choose_scene(dr)
 
-    def end_scene(self, result=False):  # True - начать сцену, False - закончить сцену
-        return 0
+    def choose_scene(self, scene="menu"):
+        if not self.scenes[scene]:
+            self.scenes[scene] = self.sceneCreator.load_scene(scene)
+        self.scene = self.scenes[scene]
 
     def choose_resolution(self, screen, oldRes):
         self.screen = screen
