@@ -30,7 +30,7 @@ class Rendering(object):
 
     def load_fon(self, texName, colorKey=False, cols=1, rows=1, animaD=1, sk=1280):
         sheet = self.set_texture(texName, colorKey)
-        size = 1 + sheet.get_rect().w / sk
+        size = sk / sheet.get_rect().w
         return Fon((sheet, 0, 0, cols, rows, animaD, size))
 
     def set_texture(self, texName, colorKey=False):
@@ -178,6 +178,14 @@ class SceneChooser(Button):
 
 
 class Actor(Button):
+    def __init__(self, parameters: dict, events: dict, text: dict):
+        super().__init__(parameters, events, text)
+
+    def do(self):
+        return
+
+
+class Dialog(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
 
