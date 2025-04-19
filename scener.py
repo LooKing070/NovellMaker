@@ -19,7 +19,6 @@ class Scene:
         for obj in objects:
             self.objects.add(obj)
         self.result = "PAUSED"
-        print(self.objects)
 
         self._music.play(-1)
 
@@ -103,7 +102,7 @@ class SceneCreator(object):
                             events = {k: v for k, v in json.load(file).items()}
                         elif "parameters" in f:
                             parameters = {k: v for k, v in json.load(file).items()}
-                            parameters["texture"][0] = self.render.set_texture(parameters["texture"][0])
+                            parameters["texture"][0] = self.render.set_texture(*parameters["texture"][0].split('+'))
                             for i in range(len(parameters["sounds"])):
                                 parameters["sounds"][i] = self.sounder.load_sound(parameters["sounds"][i])
                 elif ".txt" in f[-4:]:

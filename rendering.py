@@ -17,8 +17,7 @@ class Rendering(object):
         self._videosPath = os.path.abspath("videos")
 
         self.textures = {}
-        self.fonts = {}
-        self.defaultFont = None
+        self.fonts = {"default": pygame.font.SysFont("arial", 22)}
         self.buttonsCreator = ButtonsCreator()
 
         with open(f"{self._fontsPath}\\parameters.json") as fontsPar:
@@ -26,17 +25,17 @@ class Rendering(object):
                 if "Font" in name:
                     self.fonts[name] = pygame.font.Font(f"{self._fontsPath}\\{font[0]}", font[1])
                 else:
-                    self.defaultFont = self.fonts[font]
+                    self.fonts[name] = self.fonts[font]
 
     def load_fon(self, texName, colorKey=False, cols=1, rows=1, animaD=1, sk=1280):
         sheet = self.set_texture(texName, colorKey)
         size = sk / sheet.get_rect().w
         return Fon((sheet, 0, 0, cols, rows, animaD, size))
 
-    def set_texture(self, texName, colorKey=False):
+    def set_texture(self, texName, colorKey=0.0):
         if texName not in self.textures:
             tex = pygame.image.load(f"{self._texPath}\\{texName}")
-            if colorKey:
+            if float(colorKey):
                 colorKey = tex.get_at((0, 0))
                 tex.set_colorkey(colorKey)
                 tex = tex.convert()
@@ -65,14 +64,14 @@ class AnimatedSprite(pygame.sprite.Sprite):
         super().__init__()
         self.frames = []
         self._cut_sheet(sheet, columns, rows)
-        self._size = size
+        self._sizeCo = size
         self._savedFrames = self.frames[::]
         self.currentFrame = 0
         self.animationTimer, self.animationDelay = 0, animationDelay
         self.runAnim = False
         self.image = self.frames[self.currentFrame]
 
-        self.rect = self.rect.move(x, y)
+        self.rect.topleft = (x, y)
         self.resize(1, 1)
 
     def _cut_sheet(self, sheet, columns, rows):
@@ -86,10 +85,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
     def resize(self, xCo, yCo):
         for frame in range(len(self._savedFrames)):
             sheet = self._savedFrames[frame]
-            self.frames[frame] = pygame.transform.scale(sheet, (sheet.get_width() * self._size * xCo,
-                                                                sheet.get_height() * self._size * yCo))
+            self.frames[frame] = pygame.transform.scale(sheet, (sheet.get_width() * self._sizeCo * xCo,
+                                                                sheet.get_height() * self._sizeCo * yCo))
         self.image = self.frames[self.currentFrame]
-        self.rect = self.image.get_rect()
+        self.rect.size = self.image.get_size()
 
     def do_anim(self, currentFrame=0, endFrame=0, object=None):
         if not endFrame: endFrame = len(self.frames) - 1
@@ -133,12 +132,12 @@ class Button(AnimatedSprite):
         self.events = events
         textFonts = parameters["speech"]
         self.text = text
-        # self.name = TextPlane(parameters["name"])
+        # self.name = TextPlane(textFonts, parameters["name"])
         self.type = parameters["name"]
         self.clicks = 0
 
     def __str__(self):
-        return self.type
+        return "Button"
 
     def check_click(self, pos):
         if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
@@ -167,7 +166,7 @@ class Button(AnimatedSprite):
             elif "play_" in event:
                 for _ in range(self.events[event]):
                     self.update()
-            elif event == "scene":
+            elif "load_" in event:
                 result = self.events[event]
         return result
 

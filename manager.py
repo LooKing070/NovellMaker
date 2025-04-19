@@ -61,11 +61,15 @@ class Manager(object):
                     for dr in result:
                         if dr in self.scenes:
                             self.choose_scene(dr)
+                print(result)
 
     def choose_scene(self, scene="menu"):
         if not self.scenes[scene]:
             self.scenes[scene] = self.sceneCreator.load_scene(scene)
         self.scene = self.scenes[scene]
+        for obj in self.scene.objects:
+            if str(obj) == "Button":
+                obj.do("on_start")
 
     def choose_resolution(self, screen, oldRes):
         self.screen = screen
