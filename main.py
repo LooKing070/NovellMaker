@@ -8,18 +8,21 @@ from rendering import Rendering
 def main():
     pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
+    windowTypes = {"resizable": pygame.RESIZABLE, "scaled": pygame.SCALED}
     with open(os.path.abspath("p_data\\nm.txt"), 'r', encoding="UTF8") as nm_par:
-        windowType = nm_par.readline().lower()
+        windowType = nm_par.readline().lower().rstrip()
         windowRes = [int(i) for i in nm_par.readline().split()]
-        if "resiz" in windowType:  # sssx, vsync=1
-            screen = pygame.display.set_mode(windowRes, pygame.RESIZABLE)
-        else:
-            screen = pygame.display.set_mode(windowRes, pygame.SCALED)
+        screen = pygame.display.set_mode(windowRes, windowTypes[windowType])  # sssx, vsync=1
         pygame.display.set_caption(nm_par.readline().rstrip())
         pygame.display.set_icon(Rendering.load_texture(os.path.abspath("textures\\NM_icon.png")))
 
-    vScreen = pygame.Surface((screen.get_width(), screen.get_height()))
+    vScreen = pygame.Surface(screen.get_size())
     manager = Manager(vScreen)
+    screen = pygame.display.set_mode(manager.local_settings["resolution"], windowTypes[windowType])
+    vScreen = pygame.transform.scale(vScreen, manager.local_settings["resolution"])
+    manager.choose_resolution(vScreen, windowRes)
+
+    pygame.key.set_repeat(500, 50)
     clock = pygame.time.Clock()
     fps = 60
     running = True

@@ -128,7 +128,7 @@ class Fon(AnimatedSprite):
 class Button(AnimatedSprite):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(*parameters["texture"])
-        self._sounds = parameters["sounds"]
+        self.sounds = parameters["sounds"]
         self.events = events
         textFonts = parameters["speech"]
         self.text = text
@@ -162,7 +162,7 @@ class Button(AnimatedSprite):
             elif "say_" in event:
                 result = self.text[self.events[event]]
             elif "sound_" in event:
-                self._sounds[self.events[event]].play(-1)
+                self.sounds[self.events[event]].play(-1)
             elif "play_" in event:
                 for _ in range(self.events[event]):
                     self.update()

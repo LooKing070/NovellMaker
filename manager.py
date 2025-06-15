@@ -23,34 +23,32 @@ class Manager(object):
 
         self.scenes = {k: None for k in os.listdir(self.scenePath)}
         self.scene = None
+        self.save = self.open_login_save()
+        self.local_settings = self.open_settings()
+
         self.choose_scene()
+        self.choose_volume(0)
         print(self.scenes)
 
-    @staticmethod
-    def open_logins_params(path):
-        playerLogin = {}
-        with open(path, "r", newline="", encoding="utf-8") as loginFile:
-            reader = csv.reader(loginFile, delimiter=';', quotechar='\n')
-            readed = []
-            for index, row in enumerate(reader):
-                if index > 0:
-                    for p in range(len(row)):
-                        row[p] = [i.strip('"') for i in row[p].split()]
-                readed.append(row)
-            for column in range(len(readed[0])):
-                for login in range(1, len(readed)):
-                    key = readed[0][column]
-                    if key in playerLogin:
-                        if len(readed[login][column]) > 1:
-                            playerLogin[key] += [readed[login][column]]
-                        else:
-                            playerLogin[key] += readed[login][column]
-                    else:
-                        if len(readed[login][column]) > 1:
-                            playerLogin[key] = [readed[login][column]]
-                        else:
-                            playerLogin[key] = readed[login][column]
-        return playerLogin
+    def open_login_save(self):
+        with open(f"{self.dataPath}\\login.csv", "r", newline="", encoding="utf-8") as loginFile:
+            playerLoginSave = csv.DictReader(loginFile, delimiter=';', quotechar='\n')
+            for line in playerLoginSave:
+                playerLoginSave = dict(line)
+        return playerLoginSave
+
+    def open_settings(self, edit: bool = False):
+        if edit:
+            with open(f"{self.dataPath}\\local_settings.csv", "w", newline="", encoding="utf-8") as settingsFile:
+                pass
+        else:
+            with open(f"{self.dataPath}\\local_settings.csv", "r", newline="", encoding="utf-8") as settingsFile:
+                settings = csv.DictReader(settingsFile, delimiter=';', quotechar='\n')
+                for line in settings:
+                    settings = dict(line)
+                settings["volume"] = float(settings["volume"])
+                settings["resolution"] = [int(i) for i in settings["resolution"].split()]
+        return settings
 
     def check_click(self, pos, objects):
         for button in objects:
@@ -77,5 +75,9 @@ class Manager(object):
         wPercent, hPercent = screen.get_width() / oldRes[0], screen.get_height() / oldRes[1]
         self.scene.fon.update((wPercent, hPercent))
         self.scene.objects.update((wPercent, hPercent))
-        return
 
+    def choose_volume(self, percent: float):
+        self.local_settings["volume"] += percent
+        self.scene.music.set_volume(self.local_settings["volume"])
+        """for obj in self.scene.objects:
+            obj.sounds.set_volume(self.local_settings["volume"])"""

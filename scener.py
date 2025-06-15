@@ -14,13 +14,13 @@ class Scene:
         self.screen = screen
         self.screenSize = self.screen.get_width(), self.screen.get_height()
         self.fon = fon
-        self._music = music
+        self.music = music
         self.objects = pygame.sprite.Group()
         for obj in objects:
             self.objects.add(obj)
         self.result = "PAUSED"
 
-        self._music.play(-1)
+        self.music.play(-1)
 
     def show(self):  # Возвращает ЛОЖЬ для продолжения игры
         self.fon.update()

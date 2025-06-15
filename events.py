@@ -15,6 +15,10 @@ def event_check(manager, mouse_x_y, event):  # если возвращает Fal
             if str(manager.scene) == "menu":
                 return True
             manager.choose_scene()
+        elif event.key == pygame.K_UP:
+            manager.choose_volume(0.05)
+        elif event.key == pygame.K_DOWN:
+            manager.choose_volume(-0.05)
         elif str(manager.scene) == "game":
             if pygame.key.name(event.key).isdigit():
                 if 0 < int(pygame.key.name(event.key)) < 5:
