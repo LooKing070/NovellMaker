@@ -19,6 +19,8 @@ def event_check(manager, mouse_x_y, event):  # если возвращает Fal
             manager.choose_volume(0.05)
         elif event.key == pygame.K_DOWN:
             manager.choose_volume(-0.05)
+        elif event.key == pygame.K_F5 or event.key == pygame.K_F6 or event.key == pygame.K_F7:
+            manager.save_settings()
         elif str(manager.scene) == "game":
             if pygame.key.name(event.key).isdigit():
                 if 0 < int(pygame.key.name(event.key)) < 5:

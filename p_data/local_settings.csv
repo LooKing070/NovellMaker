@@ -1,2 +1,2 @@
-volume;resolution;interactionBind;saveBind
-0.95;1280 920;mouse1;=
+volume,resolution,interactionBind,saveBind
+0.35,1280 920,mouse1,=

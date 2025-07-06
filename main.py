@@ -18,8 +18,8 @@ def main():
 
     vScreen = pygame.Surface(screen.get_size())
     manager = Manager(vScreen)
-    screen = pygame.display.set_mode(manager.local_settings["resolution"], windowTypes[windowType])
-    vScreen = pygame.transform.scale(vScreen, manager.local_settings["resolution"])
+    screen = pygame.display.set_mode(manager.localSettings["resolution"], windowTypes[windowType])
+    vScreen = pygame.transform.scale(vScreen, manager.localSettings["resolution"])
     manager.choose_resolution(vScreen, windowRes)
 
     pygame.key.set_repeat(500, 50)

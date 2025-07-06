@@ -128,6 +128,7 @@ class Fon(AnimatedSprite):
 class Button(AnimatedSprite):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(*parameters["texture"])
+        self.x, self.y = self.rect.x, self.rect.y
         self.sounds = parameters["sounds"]
         self.events = events
         textFonts = parameters["speech"]
@@ -149,6 +150,8 @@ class Button(AnimatedSprite):
     def update(self, size=()):
         if size:
             self.resize(size[0], size[1])
+            self.rect.x = self.x * size[0]
+            self.rect.y = self.y * size[1]
         else:
             self.runAnim = True
 
