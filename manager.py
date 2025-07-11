@@ -35,7 +35,7 @@ class Manager(object):
             playerLoginSave = csv.DictReader(loginFile, delimiter=',', quotechar='\n')
             for line in playerLoginSave:
                 playerLoginSave = dict(line)
-        return playerLoginSave
+        return {k: v.split() if ' ' in v else v for k, v in playerLoginSave.items()}
 
     def open_settings(self):
         with open(f"{self.dataPath}\\local_settings.csv", "r", newline="", encoding="utf-8") as settingsFile:
@@ -55,23 +55,34 @@ class Manager(object):
             writer.writerow(saveSettings)
 
     def check_click(self, pos, objects):
-        for button in objects:
+        for button in objects.values():
             clicks = button.check_click(pos)
             if clicks:  # проверка попадания по кнопке
-                result = button.do()
-                if type(result) == list:
-                    for dr in result:
-                        if dr in self.scenes:
-                            self.choose_scene(dr)
-                print(result)
+                self.do(button.do())
+
+    def do(self, result):
+        if '&' in result:
+            if "sh&" == result[:3]:
+                self.scene.objects[result[3:]].showed = True
+            elif "sa&" == result[:3]:
+                pass
+            elif "lo&" == result[:3]:
+                self.choose_scene(result[3:])
+        else:
+            for r in result:
+                self.do(r)
+        pass
 
     def choose_scene(self, scene="menu"):
+        if self.scene:
+            self.scene.music.stop()
         if not self.scenes[scene]:
             self.scenes[scene] = self.sceneCreator.load_scene(scene)
         self.scene = self.scenes[scene]
-        for obj in self.scene.objects:
+        self.scene.music.play(-1)
+        for obj in self.scene.objects.values():
             if str(obj) == "Button":
-                obj.do("on_start")
+                self.do(obj.do("on_start"))
 
     def choose_resolution(self, screen, oldRes):
         self.screen = screen
@@ -80,7 +91,8 @@ class Manager(object):
         wPercent, hPercent = screenW / oldRes[0], screenH / oldRes[1]
         self.localSettings["resolution"] = [screenW, screenH]
         self.scene.fon.update((wPercent, hPercent))
-        self.scene.objects.update((wPercent, hPercent))
+        for obj in self.scene.objects.values():
+            obj.update((wPercent, hPercent))
 
     def choose_volume(self, percent: float):
         if 0 <= self.localSettings["volume"] + percent <= 1:

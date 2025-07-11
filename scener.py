@@ -15,17 +15,17 @@ class Scene:
         self.screenSize = self.screen.get_width(), self.screen.get_height()
         self.fon = fon
         self.music = music
-        self.objects = pygame.sprite.Group()
+        self.objects = {}
         for obj in objects:
-            self.objects.add(obj)
+            self.objects[obj.type] = obj
         self.result = "PAUSED"
-
-        self.music.play(-1)
 
     def show(self):  # Возвращает ЛОЖЬ для продолжения игры
         self.fon.update()
         self.screen.blit(self.fon.image, (0, 0))
-        self.objects.draw(self.screen)
+        for obj in self.objects.values():
+            if obj.showed:
+                self.screen.blit(obj.image, obj.rect.topleft)
         return False
 
 
@@ -102,6 +102,7 @@ class SceneCreator(object):
                             events = {k: v for k, v in json.load(file).items()}
                         elif "parameters" in f:
                             parameters = {k: v for k, v in json.load(file).items()}
+                            parameters["type"] = currentDir
                             parameters["texture"][0] = self.render.set_texture(*parameters["texture"][0].split('+'))
                             for i in range(len(parameters["sounds"])):
                                 parameters["sounds"][i] = self.sounder.load_sound(parameters["sounds"][i])

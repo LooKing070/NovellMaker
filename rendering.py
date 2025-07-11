@@ -68,7 +68,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self._savedFrames = self.frames[::]
         self.currentFrame = 0
         self.animationTimer, self.animationDelay = 0, animationDelay
-        self.runAnim = False
+        self.runAnim = 0
         self.image = self.frames[self.currentFrame]
 
         self.rect.topleft = (x, y)
@@ -100,7 +100,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
             else:
                 self.image = self.frames[self.currentFrame]
             if currentFrame == endFrame:
-                self.runAnim = False
+                self.runAnim -= 1
                 pygame.time.set_timer(self.animationTimer, 0)
             self.animationTimer = pygame.time.get_ticks() + self.animationDelay
             return self.runAnim
@@ -129,12 +129,14 @@ class Button(AnimatedSprite):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(*parameters["texture"])
         self.x, self.y = self.rect.x, self.rect.y
-        self.sounds = parameters["sounds"]
         self.events = events
-        textFonts = parameters["speech"]
         self.text = text
+        self.sounds = parameters["sounds"]
+        textFonts = parameters["speech"]
+        self.type = parameters["type"]
         # self.name = TextPlane(textFonts, parameters["name"])
-        self.type = parameters["name"]
+
+        self.showed = False
         self.clicks = 0
 
     def __str__(self):
@@ -147,30 +149,29 @@ class Button(AnimatedSprite):
             return self.clicks
         return False
 
-    def update(self, size=()):
+    def update(self, size=(), animaCount=1):
         if size:
             self.resize(size[0], size[1])
             self.rect.x = self.x * size[0]
             self.rect.y = self.y * size[1]
         else:
-            self.runAnim = True
+            self.runAnim = animaCount
 
     def do(self, event="on_click"):
-        result = None
+        result = ''
         if event in self.events:
             if "on_" in event:
                 result = [self.do(eS) for eS in self.events[event]]
             elif "show_" in event:
-                result = self.events[event]
+                result = "sh&" + self.events[event]
             elif "say_" in event:
-                result = self.text[self.events[event]]
+                result = "sa&" + self.text[self.events[event]]
             elif "sound_" in event:
                 self.sounds[self.events[event]].play(-1)
             elif "play_" in event:
-                for _ in range(self.events[event]):
-                    self.update()
+                self.update(animaCount=self.events[event])
             elif "load_" in event:
-                result = self.events[event]
+                result = "lo&" + self.events[event]
         return result
 
 
