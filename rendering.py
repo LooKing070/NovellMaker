@@ -32,10 +32,12 @@ class Rendering(object):
         size = sk / sheet.get_rect().w
         return Fon((sheet, 0, 0, cols, rows, animaD, size))
 
-    def set_texture(self, texName, colorKey=0.0):
+    def set_texture(self, texName, colorKey=0):
         if texName not in self.textures:
             tex = pygame.image.load(f"{self._texPath}\\{texName}")
-            if float(colorKey):
+            colorKey = int(colorKey)
+            if colorKey:
+                tex.set_alpha(colorKey)
                 colorKey = tex.get_at((0, 0))
                 tex.set_colorkey(colorKey)
                 tex = tex.convert()
@@ -117,6 +119,15 @@ class TextPlane(pygame.sprite.Sprite):
 
 
 class Fon(AnimatedSprite):
+    def __init__(self, textureParameters):
+        super().__init__(*textureParameters)
+
+    def update(self, size=()):
+        if size:
+            self.resize(size[0], size[1])
+
+
+class Perehod(AnimatedSprite):
     def __init__(self, textureParameters):
         super().__init__(*textureParameters)
 
