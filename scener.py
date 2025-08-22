@@ -9,12 +9,14 @@ class Scene:
     def __str__(self):
         return self.sceneName
 
-    def __init__(self, sceneName, screen, fon, music, objects):
+    def __init__(self, sceneName, screen, fon, music, objects, script: list):
         self.sceneName = sceneName
         self.screen = screen
         self.screenSize = self.screen.get_width(), self.screen.get_height()
         self.fon = fon
         self.music = music
+        self.script = script  # [[obj, event], [obj, event], ]
+        self.action = 0
         self.objects = {}
         for obj in objects:
             self.objects[obj.type] = obj
@@ -24,7 +26,7 @@ class Scene:
         self.fon.update()
         self.screen.blit(self.fon.image, (0, 0))
         for obj in self.objects.values():
-            if obj.showed:
+            if obj.transparency:
                 self.screen.blit(obj.image, obj.rect.topleft)
         return False
 

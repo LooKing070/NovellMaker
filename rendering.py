@@ -145,10 +145,10 @@ class Button(AnimatedSprite):
         self.sounds = parameters["sounds"]
         textFonts = parameters["speech"]
         self.type = parameters["type"]
-        # self.name = TextPlane(textFonts, parameters["name"])
 
-        self.showed = False
+        self.transparency = 1
         self.clicks = 0
+        self.plotScore = 0
 
     def __str__(self):
         return "Button"
@@ -167,20 +167,24 @@ class Button(AnimatedSprite):
             self.rect.y = self.y * size[1]
         else:
             self.runAnim = animaCount
+            self.do_anim()
 
     def do(self, event="on_click"):
         result = ''
         if event in self.events:
             if "on_" in event:
                 result = [self.do(eS) for eS in self.events[event]]
-            elif "show_" in event:
-                result = "sh&" + self.events[event]
+            elif "tran_" in event:
+                result = "tr&" + self.events[event]
             elif "say_" in event:
                 result = "sa&" + self.text[self.events[event]]
-            elif "sound_" in event:
-                self.sounds[self.events[event]].play(-1)
+            elif "plot_" in event:
+                self.plotScore += int(self.events[event])
             elif "play_" in event:
-                self.update(animaCount=self.events[event])
+                if self.events[event].isdigit():
+                    self.update(animaCount=self.events[event])
+                else:
+                    self.sounds[self.events[event]].play(-1)
             elif "load_" in event:
                 result = "lo&" + self.events[event]
         return result
@@ -199,6 +203,7 @@ class Lister(Button):
 class Actor(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
+        # self.name = TextPlane(textFonts, parameters["name"])
 
 
 class Dialog(Button):
@@ -215,7 +220,7 @@ class ButtonsCreator(object):
         return cls.__instance
 
     def __init__(self):
-        self.buttonTypes = {"Button": Button, "BinBox": BindBox, "Lister": Lister, "Actor": Actor}
+        self.buttonTypes = {"Button": Button, "BinBox": BindBox, "Lister": Lister, "Actor": Actor, "Dialog": Dialog}
 
     def create_button(self, type, parameters, events, text):
         if type in self.buttonTypes:

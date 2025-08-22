@@ -25,6 +25,7 @@ class Manager(object):
         self.scene = None
         self.save = self.open_login_save()
         self.localSettings = self.open_settings()
+        self.interactionMB = self.localSettings["interactionMB"]
 
         self.choose_scene()
         self.choose_volume(0)
@@ -44,6 +45,7 @@ class Manager(object):
                 settings = dict(line)
             settings["volume"] = float(settings["volume"])
             settings["resolution"] = [int(i) for i in settings["resolution"].split()]
+            settings["interactionMB"] = [int(i) for i in settings["interactionMB"].split()]
         return settings
 
     def save_settings(self):
@@ -62,8 +64,8 @@ class Manager(object):
 
     def do(self, result):
         if '&' in result:
-            if "sh&" == result[:3]:
-                self.scene.objects[result[3:]].showed = True
+            if "tr&" == result[:3]:
+                self.scene.objects[result[3:]].transparency = 1
             elif "sa&" == result[:3]:
                 pass
             elif "lo&" == result[:3]:
@@ -80,9 +82,6 @@ class Manager(object):
             self.scenes[scene] = self.sceneCreator.load_scene(scene)
         self.scene = self.scenes[scene]
         self.scene.music.play(-1)
-        for obj in self.scene.objects.values():
-            if str(obj) == "Button":
-                self.do(obj.do("on_start"))
 
     def choose_resolution(self, screen, oldRes):
         self.screen = screen

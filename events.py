@@ -4,12 +4,12 @@ import pygame
 def event_check(manager, mouse_x_y, event):  # если возвращает False, то приложение не закрывается
     mouse_x, mouse_y = mouse_x_y
     if event.type == pygame.MOUSEBUTTONDOWN:
-        if event.button == 1:  # Левая кнопка мыши
+        if event.button == manager.interactionMB:  # кнопка мыши, взаимодействующая с объектами
             manager.check_click((mouse_x, mouse_y), manager.scene.objects)
-        elif event.button == 3:  # Правая кнопка мыши
-            manager.check_click((mouse_x, mouse_y), manager.scene.objects)
-        elif event.button == 2:  # Колесо мыши
-            print("Колесо мыши было нажато")
+        else:  # кнопка мыши, активирующая следующее действие
+            action = manager.scene.script[manager.scene.action]
+            manager.scene.objects[action[0]].do(action[1])
+            manager.scene.action += 1
     elif event.type == pygame.KEYDOWN:
         if event.key == pygame.K_ESCAPE:
             if str(manager.scene) == "menu":
