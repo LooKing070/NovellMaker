@@ -1,0 +1,10 @@
+teacher - tran_show
+teacher - &
+sound_bruh text_table - play_anim
+&
+teacher - $
+11 - sound_bruh
+2 - sound_bruh
+1 - say_hello
+$
+start_button - load_scene

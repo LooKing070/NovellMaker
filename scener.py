@@ -77,6 +77,7 @@ class SceneCreator(object):
         fon = None
         music = None
         objects = []
+        script = []
         sceneType = ''
         path = f"{self.path}\\{sceneName}"
         with open(f"{path}\\parameters.json", 'r', encoding="utf-8") as par_file:
@@ -91,7 +92,27 @@ class SceneCreator(object):
                     music = self.sounder.load_fon_music(value)
                 else:
                    objects = self._load_objects(path, value)
-        return self.scenes[sceneType](sceneName, self.screen, fon, music, objects)
+        with open(f"{path}\\script.txt", 'r', encoding="utf-8") as scr_file:
+            s = [el.rstrip('\n') for el in scr_file.readlines() if el]
+            action = []
+            for i in range(len(s)):
+                match s[i].split():
+                    case [name, '-', '$']:
+                        action.append([name, '$'])
+                    case [name, '-', '&']:
+                        action.append([name, '&'])
+                    case [name, '-', event] if not action:
+                        script.append([name, event])
+                    case [score, '-', event] if action[0][1] == '$':
+                        action.append([int(score), event])
+                    case [myEvent, name, '-', event] if action[0][1] == '&':
+                        action.append([myEvent, name, event])
+                    case ['$'] | ['&']:
+                        script.append(action)
+                        action = []
+                    case other:
+                        print(other)
+        return self.scenes[sceneType](sceneName, self.screen, fon, music, objects, script)
 
     def _load_objects(self, path: str, objects: list):  # Загрузка объектов (кнопок) в этой сцене
         newObjects = []

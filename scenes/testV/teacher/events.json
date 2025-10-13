@@ -1,9 +1,7 @@
 {
-  "on_start": ["play_anim", "show_me"],
   "on_click": ["play_anim", "say"],
-  "show_me": "teacher",
-  "show_object0": "bolvan",
+  "tran_show": 125,
   "play_anim": 0,
-  "say": "3реплика",
-  "sound": "zombie_deading"
+  "say_hello": "3реплика",
+  "sound_bruh": "zombie_deading"
 }
