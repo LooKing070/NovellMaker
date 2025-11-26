@@ -3,14 +3,14 @@ import pygame
 
 def event_check(manager, mouse_x_y, event):  # если возвращает False, то приложение не закрывается
     mouse_x, mouse_y = mouse_x_y
-    if event.type == pygame.MOUSEBUTTONDOWN:
+    if event.tName == pygame.MOUSEBUTTONDOWN:
         if event.button == manager.interactionMB:  # кнопка мыши, взаимодействующая с объектами
             manager.check_click((mouse_x, mouse_y), manager.scene.objects)
         else:  # кнопка мыши, активирующая следующее действие
             action = manager.scene.script[manager.scene.action]
             manager.scene.objects[action[0]].do(action[1])
             manager.scene.action += 1
-    elif event.type == pygame.KEYDOWN:
+    elif event.tName == pygame.KEYDOWN:
         if event.key == pygame.K_ESCAPE:
             if str(manager.scene) == "menu":
                 return True
@@ -42,7 +42,7 @@ def event_check(manager, mouse_x_y, event):  # если возвращает Fal
         elif str(manager.scene) == "Pause":
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                 manager.choose_scene()
-    elif event.type == pygame.KEYUP:
+    elif event.tName == pygame.KEYUP:
         if str(manager.scene) == "Game":
             if event.key == event.key == pygame.K_w:
                 manager.scene.camera.direction[1] = 0

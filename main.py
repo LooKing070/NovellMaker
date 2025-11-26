@@ -24,7 +24,7 @@ def main():
 
     pygame.key.set_repeat(500, 50)
     clock = pygame.time.Clock()
-    fps = 60
+    fps = 24
     running = True
     while running:
         vScreen.fill((0, 0, 0))

@@ -1,6 +1,7 @@
 import os
 import pygame
 import json
+import av
 
 
 class Rendering(object):
@@ -16,6 +17,8 @@ class Rendering(object):
         self._fontsPath = os.path.abspath("fonts")
         self._videosPath = os.path.abspath("videos")
 
+        self._vidContainer = []
+        self._currentVidFrame = True
         self.textures = {}
         self.fonts = {"default": pygame.font.SysFont("arial", 22)}
         self.buttonsCreator = ButtonsCreator()
@@ -57,6 +60,22 @@ class Rendering(object):
             tex = tex.convert_alpha()
         return tex
 
+    @staticmethod
+    def get_video_frame(screen, vidContainer):
+        for frame in vidContainer:
+            img = frame.to_image()
+            img = pygame.image.fromstring(img.tobytes(), img.size, img.mode)
+            screen.blit(img, (0, 0))
+            return img
+        return None
+
+    def play_video(self, screen, videoName=''):
+        if videoName:
+            self._vidContainer = av.open(self._videosPath + f"\\{videoName}").decode(video=0)
+        if self._currentVidFrame:
+            self._currentVidFrame = self.get_video_frame(screen, self._vidContainer)
+        return self._currentVidFrame
+
     def play_screen_saver(self):
         return
 
@@ -91,6 +110,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
                                                                 sheet.get_height() * self._sizeCo * yCo))
         self.image = self.frames[self.currentFrame]
         self.rect.size = self.image.get_size()
+
+    def set_transparency(self, coeff: int):
+        for frame in range(len(self._savedFrames)):
+            self.frames[frame].set_alpa(coeff)
 
     def do_anim(self, currentFrame=0, endFrame=0, object=None):
         if not endFrame: endFrame = len(self.frames) - 1
@@ -127,15 +150,6 @@ class Fon(AnimatedSprite):
             self.resize(size[0], size[1])
 
 
-class Perehod(AnimatedSprite):
-    def __init__(self, textureParameters):
-        super().__init__(*textureParameters)
-
-    def update(self, size=()):
-        if size:
-            self.resize(size[0], size[1])
-
-
 class Button(AnimatedSprite):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(*parameters["texture"])
@@ -144,9 +158,8 @@ class Button(AnimatedSprite):
         self.text = text
         self.sounds = parameters["sounds"]
         textFonts = parameters["speech"]
-        self.type = parameters["type"]
+        self.tName = parameters["type"]  # техническое имя
 
-        self.transparency = 1
         self.clicks = 0
         self.plotScore = 0
 
@@ -175,7 +188,8 @@ class Button(AnimatedSprite):
             if "on_" in event:
                 result = [self.do(eS) for eS in self.events[event]]
             elif "tran_" in event:
-                result = "tr&" + self.events[event]
+                self.set_transparency(int(self.events[event]))
+                result = True
             elif "say_" in event:
                 result = "sa&" + self.text[self.events[event]]
             elif "plot_" in event:
@@ -194,10 +208,32 @@ class BindBox(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
 
+    def __str__(self):
+        return "BinBox"
 
-class Lister(Button):
+
+class VideoPlayer:
     def __init__(self, parameters: dict, events: dict, text: dict):
-        super().__init__(parameters, events, text)
+        self.screen = parameters["screen"]
+        self.sounds = parameters["sounds"]
+        self.textFonts = parameters["speech"]
+        self.tName = parameters["type"]
+        self.events = events
+        self.text = text
+
+        self.plotScore = 0
+
+    def __str__(self):
+        return "VidPlr"
+
+    def do(self, event="play_video"):
+        if "play_" in event:
+            if self.events[event][-3:] == "mp4":
+                Rendering.play_video(self.screen, self.events[event])
+            else:
+                self.sounds[self.events[event]].play(-1)
+        else:
+            print("THERE IS NO SUCH EVENT")
 
 
 class Actor(Button):
@@ -205,10 +241,16 @@ class Actor(Button):
         super().__init__(parameters, events, text)
         # self.name = TextPlane(textFonts, parameters["name"])
 
+    def __str__(self):
+        return "Actor"
+
 
 class Dialog(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
+
+    def __str__(self):
+        return "Dialog"
 
 
 class ButtonsCreator(object):
@@ -220,10 +262,10 @@ class ButtonsCreator(object):
         return cls.__instance
 
     def __init__(self):
-        self.buttonTypes = {"Button": Button, "BinBox": BindBox, "Lister": Lister, "Actor": Actor, "Dialog": Dialog}
+        self.objectTypes = {"Button": Button, "BinBox": BindBox, "VidPlr": VideoPlayer, "Actor": Actor, "Dialog": Dialog}
 
     def create_button(self, type, parameters, events, text):
-        if type in self.buttonTypes:
-            return self.buttonTypes[type](parameters, events, text)
+        if type in self.objectTypes:
+            return self.objectTypes[type](parameters, events, text)
         else:
-            return self.buttonTypes["Button"](parameters, events, text)
+            return self.objectTypes["Button"](parameters, events, text)

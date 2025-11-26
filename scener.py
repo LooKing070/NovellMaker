@@ -19,7 +19,7 @@ class Scene:
         self.action = 0
         self.objects = {}
         for obj in objects:
-            self.objects[obj.type] = obj
+            self.objects[obj.tName] = obj
         self.result = "PAUSED"
 
     def show(self):  # Возвращает ЛОЖЬ для продолжения игры

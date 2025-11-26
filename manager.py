@@ -29,6 +29,7 @@ class Manager(object):
 
         self.choose_scene()
         self.choose_volume(0)
+        self.sceneCreator.render.play_video(self.screen, "NMintro.mp4")
         print(self.scenes)
 
     def open_login_save(self):
@@ -60,20 +61,7 @@ class Manager(object):
         for button in objects.values():
             clicks = button.check_click(pos)
             if clicks:  # проверка попадания по кнопке
-                self.do(button.do())
-
-    def do(self, result):
-        if '&' in result:
-            if "tr&" == result[:3]:
-                self.scene.objects[result[3:]].transparency = 1
-            elif "sa&" == result[:3]:
-                pass
-            elif "lo&" == result[:3]:
-                self.choose_scene(result[3:])
-        else:
-            for r in result:
-                self.do(r)
-        pass
+                button.do()
 
     def choose_scene(self, scene="menu"):
         if self.scene:
