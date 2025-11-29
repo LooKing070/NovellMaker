@@ -1,7 +1,7 @@
-# ![](https://github.com/LooKing070/NovellMaker/blob/main/textures/NM_icon.png) Novell Maker
+# ![logo](https://github.com/LooKing070/NovellMaker/blob/main/textures/NM_icon.png) Novell Maker
 ### Latest release | Новейший билд
 + [download]() | [скачать]()
-+ [documentation]() | [документация](https://github.com/LooKing070/NovellMaker/tree/main/scenes/training)
++ [documentation](https://github.com/LooKing070/NovellMaker/tree/main/documentation/eng) | [документация](https://github.com/LooKing070/NovellMaker/tree/main/documentation/ru)
 
 ### Description | Описание
 **NovellMaker** — игровой движок для создания игр жанра "визуальная новелла", который требует от разработчика только базовые навыки пользования файловой системой.
