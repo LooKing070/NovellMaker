@@ -170,6 +170,7 @@ class Button(AnimatedSprite):
         if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
                 self.rect.y <= pos[1] <= self.rect.y + self.rect.h:
             self.clicks += 1
+            self.do()
             return self.clicks
         return False
 
@@ -183,24 +184,28 @@ class Button(AnimatedSprite):
             self.do_anim()
 
     def do(self, event="on_click"):
-        result = ''
-        if event in self.events:
-            if "on_" in event:
-                result = [self.do(eS) for eS in self.events[event]]
-            elif "tran_" in event:
-                self.set_transparency(int(self.events[event]))
-                result = True
-            elif "say_" in event:
-                result = "sa&" + self.text[self.events[event]]
-            elif "plot_" in event:
-                self.plotScore += int(self.events[event])
-            elif "play_" in event:
-                if self.events[event].isdigit():
-                    self.update(animaCount=self.events[event])
-                else:
-                    self.sounds[self.events[event]].play(-1)
-            elif "load_" in event:
-                result = "lo&" + self.events[event]
+        result = False
+        if "on_" in event:
+            result = [self.do(eS) for eS in self.events[event]]
+        elif "tran_" in event:
+            self.set_transparency(int(self.events[event]))
+            result = True
+        elif "play_" in event:
+            if self.events[event].isdigit():
+                self.update(animaCount=self.events[event])
+            else:
+                self.sounds[self.events[event]].play(-1)
+            result = True
+        else:
+            result = self._do(event)
+            if not result:
+                print(self.tName, "ERROR: THERE IS NO SUCH EVENT")
+        return result
+
+    def _do(self, event=""):
+        result = False
+        if "load_" in event:
+            result = "lo&" + self.events[event]
         return result
 
 
@@ -233,7 +238,7 @@ class VideoPlayer:
             else:
                 self.sounds[self.events[event]].play(-1)
         else:
-            print("THERE IS NO SUCH EVENT")
+            print(str(self), "ERROR: THERE IS NO SUCH EVENT")
 
 
 class Actor(Button):
@@ -243,6 +248,15 @@ class Actor(Button):
 
     def __str__(self):
         return "Actor"
+
+    def _do(self, event=""):
+        result = False
+        if "say_" in event:
+            result = "sa&" + self.text[self.events[event]]
+        elif "plot_" in event:
+            self.plotScore += int(self.events[event])
+            result = self.plotScore
+        return result
 
 
 class Dialog(Button):
