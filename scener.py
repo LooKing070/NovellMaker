@@ -2,6 +2,7 @@ import os
 import pygame
 import json
 from rendering import Rendering
+from objects import ObjectsCreator
 from sounder import Sounder
 
 
@@ -26,7 +27,7 @@ class Scene:
         self.fon.update()
         self.screen.blit(self.fon.image, (0, 0))
         for obj in self.objects.values():
-            if obj.transparency:
+            if obj.image.get_alpha():
                 self.screen.blit(obj.image, obj.rect.topleft)
         return False
 
@@ -70,6 +71,7 @@ class SceneCreator(object):
         self.path = scenePath
         self.screen = screen
         self.render = Rendering()
+        self.objectsCreator = ObjectsCreator()
         self.sounder = Sounder()
         self.scenes = {"baseScene": Scene}
 
@@ -86,7 +88,7 @@ class SceneCreator(object):
                     sceneType = value
                 elif key == "fon":
                     value[0] = f"\\bg\\{value[0]}"
-                    value += [False, 1, 1, 1, self.screen.get_width()]
+                    if len(value) == 1: value += [255, 1, 1, 1, self.screen.get_width()]
                     fon = self.render.load_fon(*value)
                 elif key == "music":
                     music = self.sounder.load_fon_music(value)
@@ -138,5 +140,5 @@ class SceneCreator(object):
                                 speech[title] = []
                             else:
                                 speech[title].append(string)
-            newObjects.append(self.render.buttonsCreator.create_button(objectType, parameters, events, speech))
+            newObjects.append(self.objectsCreator.create(objectType, parameters, events, speech))
         return newObjects
