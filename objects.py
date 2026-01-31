@@ -20,7 +20,7 @@ class Button(AnimatedSprite):
 
     def check_click(self, pos):
         if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
-                self.rect.y <= pos[1] <= self.rect.y + self.rect.h:
+                self.rect.y <= pos[1] <= self.rect.y + self.rect.h and self.image.get_alpha() > 0:
             self.clicks += 1
             self.do()
             return self.clicks
@@ -33,20 +33,19 @@ class Button(AnimatedSprite):
             self.rect.y = self.y * size[1]
         else:
             self.runAnim = animaCount
-            self.do_anim()
 
     def do(self, event="on_click"):
         result = False
         if "on_" in event:
             result = [self.do(eS) for eS in self.events[event]]
         elif "tran_" in event:
-            self.set_transparency(int(self.events[event]))
+            self.set_transparency(self.events[event])
             result = True
         elif "play_" in event:
-            if self.events[event].isdigit():
-                self.update(animaCount=self.events[event])
-            else:
-                self.sounds[self.events[event]].play(-1)
+            self.update(animaCount=self.events[event])
+            result = True
+        elif "sdut_" in event:
+            self.sounds[self.events[event]].play(0)
             result = True
         else:
             result = self._do(event)
@@ -76,13 +75,14 @@ class VideoPlayer:
         return "VidPlr"
 
     def do(self, event="play_video"):
+        result = False
         if "play_" in event:
-            if self.events[event][-3:] == "mp4":
-                Rendering.play_video(self.screen, self.events[event])
-            else:
-                self.sounds[self.events[event]].play(-1)
+            Rendering.play_video(self.screen, self.events[event])
+        elif "sdut_" in event:
+            self.sounds[self.events[event]].play(0)
         else:
             print(str(self), "ERROR: THERE IS NO SUCH EVENT")
+        return result
 
 
 class BindBox(Button):
@@ -104,9 +104,9 @@ class Actor(Button):
     def _do(self, event=""):
         result = False
         if "say_" in event:
-            result = "sa&" + self.text[self.events[event]]
+            result = self.text[self.events[event]]
         elif "plot_" in event:
-            self.plotScore += int(self.events[event])
+            self.plotScore += self.events[event]
             result = self.plotScore
         return result
 

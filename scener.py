@@ -16,12 +16,29 @@ class Scene:
         self.screenSize = self.screen.get_width(), self.screen.get_height()
         self.fon = fon
         self.music = music
-        self.script = script  # [[obj, event], [obj, event], ]
+        self.script = script  # [[obj, [event]], [obj, [event]], ]
         self.action = 0
         self.objects = {}
         for obj in objects:
             self.objects[obj.tName] = obj
         self.result = "PAUSED"
+
+    def continue_script(self):
+        result = ''
+        if len(self.script) > self.action:
+            obj, event = self.script[self.action]
+            if type(event) == str:
+                result = self.objects[obj].do(event)
+            elif event[0] == '$':  # блок с выбором действия персонажем
+                for pScore in range(1, len(event), 2):
+                    if pScore <= self.objects[obj].plotScore:
+                        result = self.objects[obj].do(event[pScore + 1])
+                        break
+            elif event[0] == '&':  # хз
+                pass
+            print(result)
+            self.action += 1
+        return result
 
     def show(self):  # Возвращает ЛОЖЬ для продолжения игры
         self.fon.update()
@@ -29,6 +46,7 @@ class Scene:
         for obj in self.objects.values():
             if obj.image.get_alpha():
                 self.screen.blit(obj.image, obj.rect.topleft)
+                obj.do_anim()
         return False
 
 
@@ -100,15 +118,15 @@ class SceneCreator(object):
             for i in range(len(s)):
                 match s[i].split():
                     case [name, '-', '$']:
-                        action.append([name, '$'])
+                        action = [name, ['$']]
                     case [name, '-', '&']:
-                        action.append([name, '&'])
+                        action = [name, ['&']]
                     case [name, '-', event] if not action:
                         script.append([name, event])
-                    case [score, '-', event] if action[0][1] == '$':
-                        action.append([int(score), event])
-                    case [myEvent, name, '-', event] if action[0][1] == '&':
-                        action.append([myEvent, name, event])
+                    case [score, '-', event] if action[1][0] == '$':
+                        action[1] += [int(score), event]
+                    case [myEvent, name, '-', event] if action[1][0] == '&':
+                        action[1] += [myEvent, name, event]
                     case ['$'] | ['&']:
                         script.append(action)
                         action = []
@@ -129,8 +147,10 @@ class SceneCreator(object):
                             parameters = {k: v for k, v in json.load(file).items()}
                             parameters["type"] = currentDir
                             parameters["texture"][0] = self.render.set_texture(*parameters["texture"][0].split('+'))
+                            sounds = {}
                             for i in range(len(parameters["sounds"])):
-                                parameters["sounds"][i] = self.sounder.load_sound(parameters["sounds"][i])
+                                sounds[parameters["sounds"][i][:-4]] = self.sounder.load_sound(parameters["sounds"][i])
+                            parameters["sounds"] = sounds
                 elif ".txt" in f[-4:]:
                     with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="UTF8") as text:
                         for string in text.readlines():

@@ -7,9 +7,7 @@ def event_check(manager, mouse_x_y, event):  # если возвращает Fal
         if event.button == manager.interactionMB:  # кнопка мыши, взаимодействующая с объектами
             manager.check_click((mouse_x, mouse_y), manager.scene.objects)
         else:  # кнопка мыши, активирующая следующее действие
-            action = manager.scene.script[manager.scene.action]
-            manager.scene.objects[action[0]].do(action[1])
-            manager.scene.action += 1
+            manager.check_action()
     elif event.type == pygame.KEYDOWN:
         if event.key == pygame.K_ESCAPE:
             if str(manager.scene) == "menu":

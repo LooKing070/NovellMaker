@@ -46,7 +46,7 @@ class Manager(object):
                 settings = dict(line)
             settings["volume"] = float(settings["volume"])
             settings["resolution"] = [int(i) for i in settings["resolution"].split()]
-            settings["interactionMB"] = [int(i) for i in settings["interactionMB"].split()]
+            settings["interactionMB"] = int(settings["interactionMB"])
         return settings
 
     def save_settings(self):
@@ -57,11 +57,15 @@ class Manager(object):
             writer.writeheader()
             writer.writerow(saveSettings)
 
-    def check_click(self, pos, objects):
+    @staticmethod
+    def check_click(pos, objects):
         for button in objects.values():
-            clicks = button.check_click(pos)
-            if clicks:  # проверка попадания по кнопке
-                button.do()
+            button.check_click(pos)
+
+    def check_action(self):
+        action = self.scene.continue_script()
+        if type(action) == str and action[:3] == "lo&":
+            self.choose_scene(action[3:])
 
     def choose_scene(self, scene="menu"):
         if self.scene:
