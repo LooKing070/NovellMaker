@@ -22,8 +22,7 @@ class Button(AnimatedSprite):
         if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
                 self.rect.y <= pos[1] <= self.rect.y + self.rect.h and self.image.get_alpha() > 0:
             self.clicks += 1
-            self.do()
-            return self.clicks
+            return self.do()
         return False
 
     def update(self, size=(), animaCount=1):

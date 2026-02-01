@@ -38,6 +38,7 @@ class Scene:
                 pass
             print(result)
             self.action += 1
+        else: print("THE ACTION ENDED IN THE SCENE")
         return result
 
     def show(self):  # Возвращает ЛОЖЬ для продолжения игры

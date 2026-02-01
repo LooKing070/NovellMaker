@@ -1,6 +1,6 @@
 {
   "on_click": ["play_anim", "say"],
-  "tran_show": 255,
+  "tran_show": 155,
   "play_anim": 0,
   "say_hello": "3реплика",
   "sound_bruh": "zombie_deading"

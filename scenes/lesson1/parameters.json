@@ -1,8 +1,8 @@
 {
   "scene_type": "baseScene",
   "fon": ["mrWhiteO.jpg"],
-  "music": "tuntuntun_fon.mp3",
+  "music": "uuuu_ch_fon.mp3",
   "objects": [
-    ["teacher", "Actor"]
+     ["start_button", "Button"]
   ]
 }

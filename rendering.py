@@ -37,6 +37,8 @@ class Rendering(object):
     def set_texture(self, texName, alfa=255):
         if texName not in self.textures:
             tex = pygame.image.load(f"{self._texPath}\\{texName}")
+            if texName[:3] != "\\bg" and texName[-3:] == "jpg":
+                tex.set_colorkey(tex.get_at((0, 0)))
             tex.set_alpha(int(alfa))
             tex = tex.convert_alpha()
             self.textures[texName] = tex

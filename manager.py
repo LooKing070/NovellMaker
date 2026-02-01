@@ -30,7 +30,6 @@ class Manager(object):
         self.choose_scene()
         self.choose_volume(0)
         self.sceneCreator.render.play_video(self.screen, "NMintro.mp4")
-        print(self.scenes)
 
     def open_login_save(self):
         with open(f"{self.dataPath}\\login.csv", "r", newline="", encoding="utf-8") as loginFile:
@@ -57,15 +56,19 @@ class Manager(object):
             writer.writeheader()
             writer.writerow(saveSettings)
 
-    @staticmethod
-    def check_click(pos, objects):
+    def check_click(self, pos, objects):
         for button in objects.values():
-            button.check_click(pos)
+            self.check_action(button.check_click(pos))
 
-    def check_action(self):
-        action = self.scene.continue_script()
-        if type(action) == str and action[:3] == "lo&":
-            self.choose_scene(action[3:])
+    def check_action(self, action):
+        if action == -1:  # если по скрипту
+            action = self.scene.continue_script()
+            if isinstance(action, str) and action[:3] == "lo&":
+                self.choose_scene(action[3:])
+        elif isinstance(action, list):  # после нажатия на кнопку
+            for a in action:
+                if isinstance(a, str) and a[:3] == "lo&":
+                    self.choose_scene(a[3:])
 
     def choose_scene(self, scene="menu"):
         if self.scene:
@@ -74,6 +77,7 @@ class Manager(object):
             self.scenes[scene] = self.sceneCreator.load_scene(scene)
         self.scene = self.scenes[scene]
         self.scene.music.play(-1)
+        self.choose_resolution(self.screen, self.sceneCreator.screen.get_size())
 
     def choose_resolution(self, screen, oldRes):
         self.screen = screen
