@@ -39,13 +39,13 @@ class Button(AnimatedSprite):
             result = [self.do(eS) for eS in self.events[event]]
         elif "tran_" in event:
             self.set_transparency(self.events[event])
-            result = True
+            result = self.tName
         elif "play_" in event:
-            self.update(animaCount=self.events[event])
-            result = True
+            self.update(animaCount=self.events[event][0])
+            result = self.tName
         elif "sdut_" in event:
             self.sounds[self.events[event]].play(0)
-            result = True
+            result = self.tName
         else:
             result = self._do(event)
             if not result:
@@ -63,10 +63,8 @@ class VideoPlayer:
     def __init__(self, parameters: dict, events: dict, text: dict):
         self.screen = parameters["screen"]
         self.sounds = parameters["sounds"]
-        self.textFonts = parameters["speech"]
         self.tName = parameters["type"]
         self.events = events
-        self.text = text
 
         self.plotScore = 0
 
@@ -77,8 +75,10 @@ class VideoPlayer:
         result = False
         if "play_" in event:
             Rendering.play_video(self.screen, self.events[event])
+            result = self.tName
         elif "sdut_" in event:
             self.sounds[self.events[event]].play(0)
+            result = self.tName
         else:
             print(str(self), "ERROR: THERE IS NO SUCH EVENT")
         return result
@@ -106,16 +106,20 @@ class Actor(Button):
             result = self.text[self.events[event]]
         elif "plot_" in event:
             self.plotScore += self.events[event]
-            result = self.plotScore
+            result = self.tName
         return result
 
 
-class Dialog(Button):
+class Dialog(TextPlane):
     def __init__(self, parameters: dict, events: dict, text: dict):
-        super().__init__(parameters, events, text)
+        super().__init__()
 
     def __str__(self):
         return "Dialog"
+
+    def _do(self):
+        result = ''
+        return result
 
 
 class Inventory(sprite.Sprite):

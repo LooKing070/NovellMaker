@@ -1,5 +1,5 @@
 {
   "on_click": ["play_anim", "load_scene"],
   "load_scene": "testV",
-  "play_anim": 2
+  "play_anim": [2, 1, 3]
 }

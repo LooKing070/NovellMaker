@@ -5,7 +5,7 @@ def event_check(manager, mouse_x_y, event):  # если возвращает Fal
     mouse_x, mouse_y = mouse_x_y
     if event.type == pygame.MOUSEBUTTONDOWN:
         if event.button == manager.interactionMB:  # кнопка мыши, взаимодействующая с объектами
-            manager.check_click((mouse_x, mouse_y), manager.scene.objects)
+            manager.check_click((mouse_x, mouse_y))
         else:  # кнопка мыши, активирующая следующее действие
             manager.check_action(-1)
     elif event.type == pygame.KEYDOWN:

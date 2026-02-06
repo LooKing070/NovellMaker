@@ -18,6 +18,7 @@ class Scene:
         self.music = music
         self.script = script  # [[obj, [event]], [obj, [event]], ]
         self.action = 0
+        self.q = []  # очередь из ивентов
         self.objects = {}
         for obj in objects:
             self.objects[obj.tName] = obj
@@ -41,14 +42,20 @@ class Scene:
         else: print("THE ACTION ENDED IN THE SCENE")
         return result
 
-    def show(self):  # Возвращает ЛОЖЬ для продолжения игры
+    def show(self):  # Возвращает текущие действия
         self.fon.update()
         self.screen.blit(self.fon.image, (0, 0))
         for obj in self.objects.values():
             if obj.image.get_alpha():
                 self.screen.blit(obj.image, obj.rect.topleft)
                 obj.do_anim()
-        return False
+                if obj.runAnim:
+                    if obj.tName not in self.q:
+                        self.q.append(obj.tName)
+                elif obj.tName in self.q:
+                    self.q.remove(obj.tName)
+        # print(self.q)
+        return self.q
 
 
 class Camera(object):

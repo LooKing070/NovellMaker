@@ -56,8 +56,8 @@ class Manager(object):
             writer.writeheader()
             writer.writerow(saveSettings)
 
-    def check_click(self, pos, objects):
-        for button in objects.values():
+    def check_click(self, pos):
+        for button in self.scene.objects.values():
             self.check_action(button.check_click(pos))
 
     def check_action(self, action):
@@ -67,11 +67,11 @@ class Manager(object):
                 self.choose_scene(action[3:])
         elif isinstance(action, list):  # после нажатия на кнопку
             for a in action:
-                if isinstance(a, str) and a[:3] == "lo&":
-                    self.choose_scene(a[3:])
+                self.scene.q.append(a)
 
     def choose_scene(self, scene="menu"):
         if self.scene:
+            self.scene.q.clear()
             self.scene.music.stop()
         if not self.scenes[scene]:
             self.scenes[scene] = self.sceneCreator.load_scene(scene)

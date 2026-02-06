@@ -37,7 +37,7 @@ class Rendering(object):
     def set_texture(self, texName, alfa=255):
         if texName not in self.textures:
             tex = pygame.image.load(f"{self._texPath}\\{texName}")
-            if texName[:3] != "\\bg" and texName[-3:] == "jpg":
+            if "alpha" in texName:
                 tex.set_colorkey(tex.get_at((0, 0)))
             tex.set_alpha(int(alfa))
             tex = tex.convert_alpha()
@@ -120,7 +120,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                 pygame.time.set_timer(self.animationTimer, 0)
             self.animationTimer = pygame.time.get_ticks() + self.animationDelay
             return self.runAnim
-        return True
+        return False
 
 
 class TextPlane(pygame.sprite.Sprite):
