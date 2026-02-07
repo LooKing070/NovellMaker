@@ -124,12 +124,21 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 
 class TextPlane(pygame.sprite.Sprite):
-    def __init__(self, parameters, font, coords: tuple):
+    def __init__(self, texture, transparency, x0, y0, pp, pSpeed, size=1):
         super().__init__()
-        self.font = font
-        self.image = self.font.render(*parameters)
+        self.image = texture
+        self._sizeCo = size
+        self._savedImage = texture
+        self.transparency = transparency
         self.rect = self.image.get_rect()
-        self.rect.topleft = coords
+        self.rect.topleft = (x0, y0)
+
+        self.text = None
+        self.pp = pp  # режим печати словами или буквами
+        self.pSpeed = pSpeed
+
+    def print(self):
+        pass
 
 
 class Fon(AnimatedSprite):

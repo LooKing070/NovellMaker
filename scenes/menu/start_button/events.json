@@ -1,5 +1,6 @@
 {
-  "on_click": ["play_anim", "load_scene"],
+  "on_click": ["play_anim", "sdut_i", "load_scene"],
   "load_scene": "lesson1",
+  "sdut_i": "indeec",
   "play_anim": [2, 1, 3]
 }

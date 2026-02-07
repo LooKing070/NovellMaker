@@ -73,6 +73,9 @@ class Manager(object):
         if self.scene:
             self.scene.q.clear()
             self.scene.music.stop()
+            for obj in self.scene.objects.values():
+                for sound in obj.sounds.values():
+                    sound.stop()
         if not self.scenes[scene]:
             self.scenes[scene] = self.sceneCreator.load_scene(scene)
         self.scene = self.scenes[scene]
