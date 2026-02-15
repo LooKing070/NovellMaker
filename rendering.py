@@ -2,6 +2,7 @@ import os
 import pygame
 import json
 import av
+from typing import Tuple, List, Optional
 
 
 class Rendering(object):
@@ -124,7 +125,20 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 
 class TextPlane(pygame.sprite.Sprite):
-    def __init__(self, texture, transparency, x0, y0, pp, pSpeed, size=1):
+    _GLOBAL_CHAR_CACHE = {}  # Глобальный кэш символов: {(шрифт, символ, цвет): поверхность}
+
+    def __init__(self, texture: pygame.Surface, font: pygame.font.Font,  transparency: int = 255,
+                 x0: int = 0, y0: int = 0, size: float = 1.0, padding: int = 15,
+                 line_spacing: int = 8, color: Tuple[int, int, int] = (0, 0, 0), alignment: str = 'left',
+                 animationDelay: int = 40, mode: str = "char"):
+        """
+        :param sprite: фоновая поверхность (прямоугольный спрайт)
+        :param font: шрифт Pygame для рендеринга текста
+        :param color: цвет текста (R, G, B)
+        :param padding: отступы текста от краёв спрайта
+        :param line_spacing: дополнительный интервал между строками
+        :param alignment: выравнивание текста внутри спрайта
+        """
         super().__init__()
         self.image = texture
         self._sizeCo = size
@@ -133,12 +147,159 @@ class TextPlane(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (x0, y0)
 
-        self.text = None
-        self.pp = pp  # режим печати словами или буквами
-        self.pSpeed = pSpeed
+        self.font = font
+        self.color = color
+        self.padding = padding
+        self.line_spacing = line_spacing
+        self.alignment = alignment  # 'left', 'center', 'right'
 
-    def print(self):
-        pass
+        self.text = ""
+        self.displayed_chars = 0  # количество отображённых символов
+        self.mode = mode  # 'char' или 'word'
+        self.word_boundaries: List[int] = []  # индексы окончаний слов
+        self.animationTimer, self.animationDelay = 0, animationDelay
+
+        self._line_layouts: List[List[Tuple[str, int, int]]] = []  # [(символ, x, y), ...]
+        self._total_chars = 0
+
+    def set_text(self, text: str, mode: str = 'char') -> None:
+        self.text = text
+        self.mode = mode
+        self.displayed_chars = 0
+        # Разбивка на строки с учётом ширины спрайта
+        self._line_layouts = self._layout_text(text)
+        self._total_chars = sum(len(line) for line in self._line_layouts)
+        # Вычисление границ слов для пословного режима
+        self.word_boundaries = self._calculate_word_boundaries()
+
+    def _layout_text(self, text: str) -> List[List[Tuple[str, int, int]]]:
+        """
+        Разбивает текст на строки с позициями символов.
+        Возвращает список строк, где каждая строка — список (символ, x, y).
+        """
+        max_width = self.image.get_width() - 2 * self.padding
+        lines = []
+        y_offset = self.padding
+        paragraphs = text.split('\n')
+
+        for paragraph in paragraphs:
+            words = paragraph.split(' ')
+            current_line = []
+            current_width = 0
+
+            for i, word in enumerate(words):
+                # Рендерим слово целиком для измерения ширины
+                word_with_space = word + (' ' if i < len(words) - 1 else '')
+                word_surf = self.font.render(word_with_space, True, self.color)
+                word_width = word_surf.get_width()
+                # Проверяем, влезает ли слово в текущую строку
+                if current_width + word_width > max_width and current_line:
+                    # Формируем строку и начинаем новую
+                    lines.append(self._build_line(current_line, y_offset))
+                    y_offset += self.font.get_height() + self.line_spacing
+                    current_line = []
+                    current_width = 0
+                # Добавляем символы слова в буфер строки
+                for char in word_with_space:
+                    current_line.append(char)
+                    current_width += self._get_char_width(char)
+
+            if current_line:
+                lines.append(self._build_line(current_line, y_offset))
+                y_offset += self.font.get_height() + self.line_spacing
+
+        return lines
+
+    def _build_line(self, chars: List[str], y: int) -> List[Tuple[str, int, int]]:
+        """Собирает строку с координатами для каждого символа"""
+        line = []
+        x = self.padding
+        for char in chars:
+            line.append((char, x, y))
+            x += self._get_char_width(char)
+        if self.alignment == 'center':
+            total_width = sum(self._get_char_width(c) for c in chars)
+            offset = (self.image.get_width() - total_width) // 2 - self.padding
+            line = [(c, x + offset, y) for (c, x, y) in line]
+        elif self.alignment == 'right':
+            total_width = sum(self._get_char_width(c) for c in chars)
+            offset = (self.image.get_width() - 2 * self.padding) - total_width
+            line = [(c, x + offset, y) for (c, x, y) in line]
+        return line
+
+    def _calculate_word_boundaries(self) -> List[int]:
+        """Вычисляет индексы символов, на которых заканчиваются слова"""
+        boundaries = []
+        char_index = 0
+        for line in self._line_layouts:
+            line_text = ''.join(c for c, _, _ in line)
+            in_word = False
+            for i, char in enumerate(line_text):
+                is_word_char = char.isalnum() or char in "'-"
+                if is_word_char and not in_word:
+                    in_word = True
+                elif not is_word_char and in_word:
+                    in_word = False
+                    boundaries.append(char_index + i)  # конец слова
+            if in_word:  # Последнее слово в строке
+                boundaries.append(char_index + len(line_text))
+            char_index += len(line_text)
+        return boundaries
+
+    def _get_char_width(self, char: str) -> int:
+        """Возвращает ширину символа через кэш метрик шрифта"""
+        metrics = self.font.metrics(char)
+        if metrics and metrics[0]:
+            return metrics[0][4]  # advance width
+        return self.font.size(char)[0]
+
+    def _get_cached_char(self, char: str) -> pygame.Surface:
+        # Ключ кэша: (идентификатор шрифта, символ, цвет)
+        # id(font) так как объекты шрифта не хэшируются напрямую
+        cache_key = (id(self.font), char, self.color)
+        if cache_key not in self._GLOBAL_CHAR_CACHE:
+            surf = self.font.render(char, True, self.color)
+            self._GLOBAL_CHAR_CACHE[cache_key] = surf
+        return self._GLOBAL_CHAR_CACHE[cache_key]
+
+    @classmethod
+    def clear_cache(cls) -> None:
+        cls._GLOBAL_CHAR_CACHE.clear()
+
+    def do_anim(self) -> bool:  # return: True если анимация ещё не завершена, False если текст полностью отображён
+        runAnim = self.displayed_chars >= self._total_chars
+        if not runAnim and pygame.time.get_ticks() >= self.animationTimer:
+            if self.mode == 'char':
+                self.displayed_chars += 1
+            else:  # word mode
+                next_boundary = next((b for b in self.word_boundaries if b > self.displayed_chars), self._total_chars)
+                self.displayed_chars = next_boundary
+            self.animationTimer = pygame.time.get_ticks() + self.animationDelay
+        if runAnim:
+            pygame.time.set_timer(self.animationTimer, 0)
+        return runAnim
+
+    def reset(self) -> None:
+        self.displayed_chars = 0
+
+    def draw(self, surface: pygame.Surface) -> None:
+        # 1. Отрисовываем фоновый спрайт
+        surface.blit(self.image, self.rect.topleft)
+        # 2. Отрисовываем текст по кэшированным позициям
+        drawn_chars = 0
+        px, py = self.rect.topleft
+        for line in self._line_layouts:
+            if drawn_chars >= self.displayed_chars:
+                break
+            for char, rel_x, rel_y in line:
+                if drawn_chars >= self.displayed_chars:
+                    break
+                char_surf = self._get_cached_char(char)
+                surface.blit(char_surf, (px + rel_x, py + rel_y))
+                drawn_chars += 1
+
+    def get_progress(self) -> float:  # return: 0-100%
+        return min(1.0, self.displayed_chars / max(1, self._total_chars))
 
 
 class Fon(AnimatedSprite):
