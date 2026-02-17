@@ -44,7 +44,7 @@ class Scene:
 
     def show(self):  # Возвращает текущие действия
         self.fon.update()
-        self.screen.blit(self.fon.image, (0, 0))
+        self.fon.draw(self.screen)
         for obj in self.objects.values():
             if obj.image.get_alpha():
                 obj.draw(self.screen)
