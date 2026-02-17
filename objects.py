@@ -25,14 +25,6 @@ class Button(AnimatedSprite):
             return self.do()
         return False
 
-    def update(self, size=(), animaCount=1):
-        if size:
-            self.resize(size[0], size[1])
-            self.rect.x = self.x * size[0]
-            self.rect.y = self.y * size[1]
-        else:
-            self.runAnim = animaCount
-
     def do(self, event="on_click"):
         result = False
         if "on_" in event:
@@ -57,6 +49,14 @@ class Button(AnimatedSprite):
         if "load_" in event:
             result = "lo&" + self.events[event]
         return result
+
+    def update(self, size=(), animaCount=1):
+        if size:
+            self.resize(size[0], size[1])
+            self.rect.x = self.x * size[0]
+            self.rect.y = self.y * size[1]
+        else:
+            self.runAnim = animaCount
 
 
 class VideoPlayer:
