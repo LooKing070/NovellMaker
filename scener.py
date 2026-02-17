@@ -47,7 +47,7 @@ class Scene:
         self.screen.blit(self.fon.image, (0, 0))
         for obj in self.objects.values():
             if obj.image.get_alpha():
-                self.screen.blit(obj.image, obj.rect.topleft)
+                obj.draw(self.screen)
                 obj.do_anim()
                 if obj.runAnim:
                     if obj.tName not in self.q:
