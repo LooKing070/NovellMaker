@@ -43,7 +43,6 @@ class Scene:
         return result
 
     def show(self):  # Возвращает текущие действия
-        self.fon.update()
         self.fon.draw(self.screen)
         for obj in self.objects.values():
             if obj.image.get_alpha():
