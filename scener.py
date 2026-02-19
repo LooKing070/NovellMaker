@@ -43,11 +43,10 @@ class Scene:
         return result
 
     def show(self):  # Возвращает текущие действия
-        self.fon.update()  # ПРОВЕРИТЬ, как работает без этой строки
-        self.screen.blit(self.fon.image, (0, 0))
+        self.fon.draw(self.screen)
         for obj in self.objects.values():
             if obj.image.get_alpha():
-                self.screen.blit(obj.image, obj.rect.topleft)
+                obj.draw(self.screen)
                 obj.do_anim()
                 if obj.runAnim:
                     if obj.tName not in self.q:

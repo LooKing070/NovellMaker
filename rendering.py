@@ -123,6 +123,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
             return self.runAnim
         return False
 
+    def draw(self, surface):
+        surface.blit(self.image, self.rect.topleft)
+
 
 class TextPlane(pygame.sprite.Sprite):
     _GLOBAL_CHAR_CACHE = {}  # Глобальный кэш символов: {(шрифт, символ, цвет): поверхность}
