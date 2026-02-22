@@ -1,6 +1,6 @@
 import os
-import pygame
 import json
+import pygame
 from rendering import Rendering
 from objects import ObjectsCreator
 from sounder import Sounder
@@ -101,7 +101,6 @@ class SceneCreator(object):
     def __init__(self, screen, scenePath: str):
         self.path = scenePath
         self.screen = screen
-        self.render = Rendering()
         self.objectsCreator = ObjectsCreator()
         self.sounder = Sounder()
         self.scenes = {"baseScene": Scene}
@@ -118,9 +117,9 @@ class SceneCreator(object):
                 if key == "scene_type":
                     sceneType = value
                 elif key == "fon":
-                    value[0] = f"\\bg\\{value[0]}"
-                    if len(value) == 1: value += [255, 1, 1, 1, self.screen.get_width()]
-                    fon = self.render.load_fon(*value)
+                    value[0] = os.path.abspath(f"textures\\bg\\{value[0]}")
+                    if len(value) == 1: value += [255, 1, 1, 1000, self.screen.get_width()]
+                    fon = Rendering.load_fon(*value)
                 elif key == "music":
                     music = self.sounder.load_fon_music(value)
                 else:
@@ -144,34 +143,12 @@ class SceneCreator(object):
                         script.append(action)
                         action = []
                     case other:
-                        print(other)
+                        pass
         return self.scenes[sceneType](sceneName, self.screen, fon, music, objects, script)
 
     def _load_objects(self, path: str, objects: list):  # Загрузка объектов (кнопок) в этой сцене
         newObjects = []
         for currentDir, objectType in objects:
-            events, parameters, speech = {}, {}, {}
-            for f in os.listdir(f"{path}\\{currentDir}"):
-                if ".json" in f:
-                    with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="utf-8") as file:
-                        if "events" in f:
-                            events = {k: v for k, v in json.load(file).items()}
-                        elif "parameters" in f:
-                            parameters = {k: v for k, v in json.load(file).items()}
-                            parameters["type"] = currentDir
-                            parameters["texture"][0] = self.render.set_texture(*parameters["texture"][0].split('+'))
-                            sounds = {}
-                            for i in range(len(parameters["sounds"])):
-                                sounds[parameters["sounds"][i][:-4]] = self.sounder.load_sound(parameters["sounds"][i])
-                            parameters["sounds"] = sounds
-                elif ".txt" == f[-4:]:
-                    with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="UTF8") as text:
-                        for string in text.readlines():
-                            string = string.rstrip()
-                            if string[-1] == string[0] == '&':
-                                title = string[1:-1]
-                                speech[title] = ""
-                            else:
-                                speech[title] += string + ' '
-            newObjects.append(self.objectsCreator.create(objectType, parameters, events, speech))
+            obj = self.objectsCreator.create(path, currentDir, objectType)
+            if obj: newObjects.append(obj)
         return newObjects

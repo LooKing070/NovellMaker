@@ -21,7 +21,7 @@ class Rendering(object):
         self._vidContainer = []
         self._currentVidFrame = True
         self.textures = {}
-        self.fonts = {"default": pygame.font.SysFont("arial", 22)}
+        self.fonts = {"default": pygame.font.SysFont("arial", 20)}
 
         with open(f"{self._fontsPath}\\parameters.json") as fontsPar:
             for name, font in json.load(fontsPar).items():
@@ -29,11 +29,6 @@ class Rendering(object):
                     self.fonts[name] = pygame.font.Font(f"{self._fontsPath}\\{font[0]}", font[1])
                 else:
                     self.fonts[name] = self.fonts[font]
-
-    def load_fon(self, texName, alfa=255, cols=1, rows=1, animaD=1, sk=1280):
-        sheet = self.set_texture(texName, alfa)
-        size = sk / sheet.get_rect().w
-        return Fon((sheet, 0, 0, cols, rows, animaD, size))
 
     def set_texture(self, texName, alfa=255):
         if texName not in self.textures:
@@ -51,6 +46,12 @@ class Rendering(object):
         tex.set_alpha(int(alfa))
         tex = tex.convert_alpha()
         return tex
+
+    @staticmethod
+    def load_fon(texPath, alfa=255, cols=1, rows=1, animaD=1000, sk=1):
+        sheet = Rendering.load_texture(texPath, alfa)
+        size = sk / sheet.get_rect().w
+        return Fon((sheet, 0, 0, cols, rows, animaD, size))
 
     @staticmethod
     def get_video_frame(screen, vidContainer):
@@ -130,13 +131,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
 class TextPlane(pygame.sprite.Sprite):
     _GLOBAL_CHAR_CACHE = {}  # Глобальный кэш символов: {(шрифт, символ, цвет): поверхность}
 
-    def __str__(self):
-        return "TextPlane"
-
-    def __init__(self, font: pygame.font.Font, texture: pygame.Surface, transparency: int = 255,
-                 x0: int = 0, y0: int = 0, size: float = 1.0, padding: int = 15,
-                 line_spacing: int = 8, color: Tuple[int, int, int] = (0, 0, 0), alignment: str = 'left',
-                 mode: int = 1, animationDelay: int = 40, tName: str = "TP"):
+    def __init__(self, font: pygame.font.Font, texture: pygame.Surface, x0: int = 0, y0: int = 0,
+                 size: float = 1.0, padding: int = 15, line_spacing: int = 8, color: Tuple[int, int, int] = (0, 0, 0),
+                 alignment: str = 'left', mode: int = 1, animationDelay: int = 40):
         """
         :param sprite: фоновая поверхность (прямоугольный спрайт)
         :param font: шрифт Pygame для рендеринга текста
@@ -149,31 +146,30 @@ class TextPlane(pygame.sprite.Sprite):
         self.image = texture
         self._sizeCo = size
         self._savedImage = texture
-        self.transparency = transparency
+        self.transparency = 255
         self.rect = self.image.get_rect()
         self.rect.topleft = (x0, y0)
-        self.tName = tName
 
         self.font = font
-        self.color = color
+        self.color = tuple(color)
         self.padding = padding
         self.line_spacing = line_spacing
         self.alignment = alignment  # 'left', 'center', 'right'
 
         self.text = ""
         self.displayed_chars = 0  # количество отображённых символов
-        self.mode = mode  # 'char' или 'word'
+        self.mode = mode  # 1 -'char' или  0 -'word'
         self.word_boundaries: List[int] = []  # индексы окончаний слов
         self.animationTimer, self.animationDelay = 0, animationDelay
+        self.runAnim = False
 
         self._line_layouts: List[List[Tuple[str, int, int]]] = []  # [(символ, x, y), ...]
         self._total_chars = 0
 
         self.resize(1, 1)
 
-    def set_text(self, text: str, mode: int = 1) -> None:
+    def set_text(self, text: str) -> None:
         self.text = text
-        self.mode = mode
         self.displayed_chars = 0
         # Разбивка на строки с учётом ширины спрайта
         self._line_layouts = self._layout_text(text)
@@ -276,17 +272,18 @@ class TextPlane(pygame.sprite.Sprite):
         cls._GLOBAL_CHAR_CACHE.clear()
 
     def do_anim(self) -> bool:  # return: True если анимация ещё не завершена, False если текст полностью отображён
-        runAnim = self.displayed_chars >= self._total_chars
-        if not runAnim and pygame.time.get_ticks() >= self.animationTimer:
-            if self.mode:  # char mode
-                self.displayed_chars += 1
-            else:  # word mode
-                next_boundary = next((b for b in self.word_boundaries if b > self.displayed_chars), self._total_chars)
-                self.displayed_chars = next_boundary
-            self.animationTimer = pygame.time.get_ticks() + self.animationDelay
-        if runAnim:
+        if self.runAnim:
+            self.runAnim = self.displayed_chars < self._total_chars
+            if pygame.time.get_ticks() >= self.animationTimer:
+                if self.mode:  # char mode
+                    self.displayed_chars += 1
+                else:  # word mode
+                    next_boundary = next((b for b in self.word_boundaries if b > self.displayed_chars), self._total_chars)
+                    self.displayed_chars = next_boundary
+                self.animationTimer = pygame.time.get_ticks() + self.animationDelay
+        else:
             pygame.time.set_timer(self.animationTimer, 0)
-        return runAnim
+        return self.runAnim
 
     def reset(self) -> None:
         self.displayed_chars = 0
@@ -315,9 +312,6 @@ class TextPlane(pygame.sprite.Sprite):
                 char_surf = self._get_cached_char(char)
                 surface.blit(char_surf, (px + rel_x, py + rel_y))
                 drawn_chars += 1
-
-    def do(self):
-        return self.tName
 
     def get_progress(self) -> float:  # return: 0-100%
         return min(1.0, self.displayed_chars / max(1, self._total_chars))

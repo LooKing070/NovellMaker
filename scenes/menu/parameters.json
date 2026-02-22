@@ -3,6 +3,6 @@
   "fon": ["mrWhiteO.jpg"],
   "music": "uuuu_ch_fon.mp3",
   "objects": [
-    ["teacher", "Actor"], ["start_button", "Button"], ["text_panel_t", "TextPlane"]
+    ["teacher", "Actor"], ["start_button", "Button"], ["text_panel_t", "Dialog"]
   ]
 }

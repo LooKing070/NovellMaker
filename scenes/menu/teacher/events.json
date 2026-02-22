@@ -2,8 +2,12 @@
   "on_click": ["play_anim", "sdut_bruh"],
   "tran_show": 255,
   "play_anim": [1, 1, 1],
-  "say_hello": ["3реплика", "text_panel_t"],
+
+  "say_hello": ["text_panel_t", "3реплика"],
+  "say_hay": ["text_panel_t", "1"],
+
   "plot_1": 1,
+
   "sdut_bruh": "zombie_deading",
   "sdut_aahh": "perelom_kosti",
   "sdut_3": "mouse_bind_info"

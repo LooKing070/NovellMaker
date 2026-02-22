@@ -29,7 +29,7 @@ class Manager(object):
 
         self.choose_scene()
         self.choose_volume(0)
-        self.sceneCreator.render.play_video(self.screen, "NMintro.mp4")
+        # self.sceneCreator.render.play_video(self.screen, "NMintro.mp4")
 
     def open_login_save(self):
         with open(f"{self.dataPath}\\login.csv", "r", newline="", encoding="utf-8") as loginFile:
@@ -65,6 +65,9 @@ class Manager(object):
             action = self.scene.continue_script()
             if isinstance(action, str) and action[:3] == "lo&":
                 self.choose_scene(action[3:])
+            elif isinstance(action, list):
+                if action[0][:3] == "sa&":
+                    self.scene.objects[action[0][3:]].do(action[1])
         elif isinstance(action, list):  # после нажатия на кнопку
             for a in action:
                 if a:

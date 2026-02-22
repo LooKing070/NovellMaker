@@ -1,8 +1,9 @@
 teacher - $
 11 - sdut_bruh
 2 - sdut_bruh
-1 - say_hello
+0 - say_hay
 $
+teacher - say_hay
 teacher - say_hello
 teacher - plot_1
 сысвс

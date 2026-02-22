@@ -1,5 +1,10 @@
+import os
+import json
+
+import pygame.font
 from pygame import sprite
 from rendering import AnimatedSprite, TextPlane, Rendering
+from sounder import Sounder
 
 
 class Button(AnimatedSprite):
@@ -10,7 +15,7 @@ class Button(AnimatedSprite):
         self.text = text
         self.sounds = parameters["sounds"]
         textFonts = parameters["speech"]
-        self.tName = parameters["type"]  # техническое имя
+        self.tName = parameters["tName"]  # техническое имя
 
         self.clicks = 0
         self.plotScore = 0
@@ -41,8 +46,8 @@ class Button(AnimatedSprite):
                 result = self.tName
             else:
                 result = self._do(event)
-                if not result:
-                    print(self.tName, "ERROR: THERE IS NO SUCH EVENT")
+        else:
+            print(self.tName, "ERROR: THERE IS NO SUCH EVENT")
         return result
 
     def _do(self, event=""):
@@ -64,7 +69,7 @@ class VideoPlayer:
     def __init__(self, parameters: dict, events: dict, text: dict):
         self.screen = parameters["screen"]
         self.sounds = parameters["sounds"]
-        self.tName = parameters["type"]
+        self.tName = parameters["tName"]
         self.events = events
 
         self.plotScore = 0
@@ -88,6 +93,7 @@ class VideoPlayer:
 class BindBox(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
+        self.tName = parameters["tName"]
 
     def __str__(self):
         return "BinBox"
@@ -96,6 +102,7 @@ class BindBox(Button):
 class Actor(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
+        pass
         # self.name = TextPlane(textFonts, parameters["name"])
 
     def __str__(self):
@@ -104,7 +111,9 @@ class Actor(Button):
     def _do(self, event=""):
         result = ''
         if "say_" in event:
-            result = self.text[self.events[event]]
+            result = []
+            for i in range(0, len(self.events[event]), 2):
+                result += ["sa&" + self.events[event][i], self.text[self.events[event][i+1]]]
         elif "plot_" in event:
             self.plotScore += self.events[event]
             result = self.tName
@@ -112,14 +121,25 @@ class Actor(Button):
 
 
 class Dialog(TextPlane):
-    def __init__(self, parameters: dict, events: dict, text: dict):
-        super().__init__()
+    def __init__(self, parameters: dict, events: dict, font: pygame.font.Font):
+        super().__init__(font, *parameters["texture"])
+        self.tName = parameters["tName"]
+        self.clicks = 0
 
     def __str__(self):
         return "Dialog"
 
-    def _do(self):
+    def check_click(self, pos):
+        if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
+                self.rect.y <= pos[1] <= self.rect.y + self.rect.h and self.image.get_alpha() > 0:
+            self.clicks += 1
+            return self.do('')
+        return False
+
+    def do(self, text):
         result = ''
+        self.set_text(text)
+        self.runAnim = True
         return result
 
 
@@ -152,11 +172,39 @@ class ObjectsCreator(object):
         return cls.__instance
 
     def __init__(self):
+        self.render = Rendering()
+        self.sounder = Sounder()
         self.objectTypes = {"Button": Button, "BinBox": BindBox, "VidPlr": VideoPlayer, "Actor": Actor,
-                            "Inventory": Inventory, "Dialog": Dialog, "TextPlane": TextPlane}
+                            "Inventory": Inventory, "Dialog": Dialog}
 
-    def create(self, type, parameters, events, text):
-        if type in self.objectTypes:
-            return self.objectTypes[type](parameters, events, text)
+    def create(self, path, currentDir, objectType):
+        if objectType in self.objectTypes:
+            events, parameters, speech = {}, {}, {}
+            for f in os.listdir(f"{path}\\{currentDir}"):
+                if ".json" in f:
+                    with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="utf-8") as file:
+                        if "events" in f:
+                            events = {k: v for k, v in json.load(file).items()}
+                        elif "parameters" in f:
+                            parameters = {k: v for k, v in json.load(file).items()}
+                            parameters["tName"] = currentDir
+                            parameters["texture"][0] = self.render.set_texture(*parameters["texture"][0].split('+'))
+                            sounds = {}
+                            for i in range(len(parameters["sounds"])):
+                                sounds[parameters["sounds"][i][:-4]] = self.sounder.load_sound(parameters["sounds"][i])
+                            parameters["sounds"] = sounds
+                elif ".txt" == f[-4:]:
+                    with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="UTF8") as text:
+                        for string in text.readlines():
+                            string = string.rstrip()
+                            if string[-1] == string[0] == '&':
+                                title = string[1:-1]
+                                speech[title] = ""
+                            else:
+                                speech[title] += string + ' '
+            if objectType == "Dialog":
+                speech = self.render.fonts["default"]
+            return self.objectTypes[objectType](parameters, events, speech)
         else:
-            return self.objectTypes["Button"](parameters, events, text)
+            print(f"ERROR: WRONG OBJECT TYPE - {objectType}")
+            return None
