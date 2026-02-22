@@ -130,10 +130,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
 class TextPlane(pygame.sprite.Sprite):
     _GLOBAL_CHAR_CACHE = {}  # Глобальный кэш символов: {(шрифт, символ, цвет): поверхность}
 
-    def __init__(self, texture: pygame.Surface, font: pygame.font.Font,  transparency: int = 255,
+    def __str__(self):
+        return "TextPlane"
+
+    def __init__(self, font: pygame.font.Font, texture: pygame.Surface, transparency: int = 255,
                  x0: int = 0, y0: int = 0, size: float = 1.0, padding: int = 15,
                  line_spacing: int = 8, color: Tuple[int, int, int] = (0, 0, 0), alignment: str = 'left',
-                 animationDelay: int = 40, mode: str = "char"):
+                 mode: int = 1, animationDelay: int = 40, tName: str = "TP"):
         """
         :param sprite: фоновая поверхность (прямоугольный спрайт)
         :param font: шрифт Pygame для рендеринга текста
@@ -149,6 +152,7 @@ class TextPlane(pygame.sprite.Sprite):
         self.transparency = transparency
         self.rect = self.image.get_rect()
         self.rect.topleft = (x0, y0)
+        self.tName = tName
 
         self.font = font
         self.color = color
@@ -165,7 +169,9 @@ class TextPlane(pygame.sprite.Sprite):
         self._line_layouts: List[List[Tuple[str, int, int]]] = []  # [(символ, x, y), ...]
         self._total_chars = 0
 
-    def set_text(self, text: str, mode: str = 'char') -> None:
+        self.resize(1, 1)
+
+    def set_text(self, text: str, mode: int = 1) -> None:
         self.text = text
         self.mode = mode
         self.displayed_chars = 0
@@ -272,7 +278,7 @@ class TextPlane(pygame.sprite.Sprite):
     def do_anim(self) -> bool:  # return: True если анимация ещё не завершена, False если текст полностью отображён
         runAnim = self.displayed_chars >= self._total_chars
         if not runAnim and pygame.time.get_ticks() >= self.animationTimer:
-            if self.mode == 'char':
+            if self.mode:  # char mode
                 self.displayed_chars += 1
             else:  # word mode
                 next_boundary = next((b for b in self.word_boundaries if b > self.displayed_chars), self._total_chars)
@@ -284,6 +290,15 @@ class TextPlane(pygame.sprite.Sprite):
 
     def reset(self) -> None:
         self.displayed_chars = 0
+
+    def resize(self, xCo, yCo):
+        """for frame in range(len(self._savedFrames)):
+            sheet = self._savedFrames[frame]
+            self.frames[frame] = pygame.transform.scale(sheet, (sheet.get_width() * self._sizeCo * xCo,
+                                                                sheet.get_height() * self._sizeCo * yCo))"""
+        self.image = pygame.transform.scale(self._savedImage, (self._savedImage.get_width() * self._sizeCo * xCo,
+                                                               self._savedImage.get_height() * self._sizeCo * yCo))
+        self.rect.size = self.image.get_size()
 
     def draw(self, surface: pygame.Surface) -> None:
         # 1. Отрисовываем фоновый спрайт
@@ -300,6 +315,9 @@ class TextPlane(pygame.sprite.Sprite):
                 char_surf = self._get_cached_char(char)
                 surface.blit(char_surf, (px + rel_x, py + rel_y))
                 drawn_chars += 1
+
+    def do(self):
+        return self.tName
 
     def get_progress(self) -> float:  # return: 0-100%
         return min(1.0, self.displayed_chars / max(1, self._total_chars))

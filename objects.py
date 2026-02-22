@@ -26,26 +26,27 @@ class Button(AnimatedSprite):
         return False
 
     def do(self, event="on_click"):
-        result = False
-        if "on_" in event:
-            result = [self.do(eS) for eS in self.events[event]]
-        elif "tran_" in event:
-            self.set_transparency(self.events[event])
-            result = self.tName
-        elif "play_" in event:
-            self.update(animaCount=self.events[event][0])
-            result = self.tName
-        elif "sdut_" in event:
-            self.sounds[self.events[event]].play(0)
-            result = self.tName
-        else:
-            result = self._do(event)
-            if not result:
-                print(self.tName, "ERROR: THERE IS NO SUCH EVENT")
+        result = ''
+        if event in self.events:
+            if "on_" in event:
+                result = [self.do(eS) for eS in self.events[event]]
+            elif "tran_" in event:
+                self.set_transparency(self.events[event])
+                result = self.tName
+            elif "play_" in event:
+                self.update(animaCount=self.events[event][0])
+                result = self.tName
+            elif "sdut_" in event:
+                self.sounds[self.events[event]].play(0)
+                result = self.tName
+            else:
+                result = self._do(event)
+                if not result:
+                    print(self.tName, "ERROR: THERE IS NO SUCH EVENT")
         return result
 
     def _do(self, event=""):
-        result = False
+        result = ''
         if "load_" in event:
             result = "lo&" + self.events[event]
         return result
@@ -72,7 +73,7 @@ class VideoPlayer:
         return "VidPlr"
 
     def do(self, event="play_video"):
-        result = False
+        result = ''
         if "play_" in event:
             Rendering.play_video(self.screen, self.events[event])
             result = self.tName
@@ -101,7 +102,7 @@ class Actor(Button):
         return "Actor"
 
     def _do(self, event=""):
-        result = False
+        result = ''
         if "say_" in event:
             result = self.text[self.events[event]]
         elif "plot_" in event:
@@ -134,7 +135,7 @@ class Inventory(sprite.Sprite):
         return "Inventory"
 
     def do(self, event=""):
-        result = False
+        result = ''
         if "add_" in event:
             pass
         elif "del_" in event:
@@ -152,7 +153,7 @@ class ObjectsCreator(object):
 
     def __init__(self):
         self.objectTypes = {"Button": Button, "BinBox": BindBox, "VidPlr": VideoPlayer, "Actor": Actor,
-                            "Inventory": Inventory, "Dialog": Dialog}
+                            "Inventory": Inventory, "Dialog": Dialog, "TextPlane": TextPlane}
 
     def create(self, type, parameters, events, text):
         if type in self.objectTypes:

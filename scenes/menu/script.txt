@@ -3,5 +3,11 @@ teacher - $
 2 - sdut_bruh
 1 - say_hello
 $
-teacher - tran_show
+teacher - say_hello
 teacher - plot_1
+сысвс
+ЭСфсЭЭ - &
+teacher - sdut_bruh
+start_button - sdut_i
+start_button - play_anim
+&

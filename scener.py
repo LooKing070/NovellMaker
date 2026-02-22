@@ -28,17 +28,22 @@ class Scene:
         result = ''
         if len(self.script) > self.action:
             obj, event = self.script[self.action]
-            if type(event) == str:
-                result = self.objects[obj].do(event)
-            elif event[0] == '$':  # блок с выбором действия персонажем
-                for pScore in range(1, len(event), 2):
-                    if pScore <= self.objects[obj].plotScore:
-                        result = self.objects[obj].do(event[pScore + 1])
-                        break
+            if obj in self.objects:
+                if type(event) == str:
+                    result = self.objects[obj].do(event)
+                elif event[0] == '$':  # блок с выбором действия персонажем
+                    for pScore in range(1, len(event), 2):
+                        if pScore <= self.objects[obj].plotScore:
+                            result = self.objects[obj].do(event[pScore + 1])
+                            break
+                print(result)
+                self.action += 1
             elif event[0] == '&':  # хз
-                pass
-            print(result)
-            self.action += 1
+                for i in range(1, len(event), 2):
+                    result = self.objects[event[i]].do(event[i + 1])
+                self.action += 1
+                print(result)
+            else: print(f"ERROR: OBJECT '{obj}' NOT FOUND. ERROR BLOCK - {self.action + 1}")
         else: print("THE ACTION ENDED IN THE SCENE")
         return result
 
@@ -53,7 +58,8 @@ class Scene:
                         self.q.append(obj.tName)
                 elif obj.tName in self.q:
                     self.q.remove(obj.tName)
-        # print(self.q)
+        if self.q:
+            print(self.q)
         return self.q
 
 
@@ -132,8 +138,8 @@ class SceneCreator(object):
                         script.append([name, event])
                     case [score, '-', event] if action[1][0] == '$':
                         action[1] += [int(score), event]
-                    case [myEvent, name, '-', event] if action[1][0] == '&':
-                        action[1] += [myEvent, name, event]
+                    case [name, '-', event] if action[1][0] == '&':
+                        action[1] += [name, event]
                     case ['$'] | ['&']:
                         script.append(action)
                         action = []
@@ -158,14 +164,14 @@ class SceneCreator(object):
                             for i in range(len(parameters["sounds"])):
                                 sounds[parameters["sounds"][i][:-4]] = self.sounder.load_sound(parameters["sounds"][i])
                             parameters["sounds"] = sounds
-                elif ".txt" in f[-4:]:
+                elif ".txt" == f[-4:]:
                     with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="UTF8") as text:
                         for string in text.readlines():
                             string = string.rstrip()
                             if string[-1] == string[0] == '&':
                                 title = string[1:-1]
-                                speech[title] = []
+                                speech[title] = ""
                             else:
-                                speech[title].append(string)
+                                speech[title] += string + ' '
             newObjects.append(self.objectsCreator.create(objectType, parameters, events, speech))
         return newObjects

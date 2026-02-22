@@ -67,7 +67,8 @@ class Manager(object):
                 self.choose_scene(action[3:])
         elif isinstance(action, list):  # после нажатия на кнопку
             for a in action:
-                self.scene.q.append(a)
+                if a:
+                    self.scene.q.append(a)
 
     def choose_scene(self, scene="menu"):
         if self.scene:
