@@ -67,7 +67,8 @@ class Manager(object):
                 self.choose_scene(action[3:])
             elif isinstance(action, list):
                 if action[0] == "sa&":
-                    self.scene.objects[action[1]].do([action[2], action[3]])
+                    for i in range(0, len(action), 5):
+                        self.scene.q.append(action[i:i+5])
         elif isinstance(action, list):  # после нажатия на кнопку
             for a in action:
                 if a:

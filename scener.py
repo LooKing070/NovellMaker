@@ -49,6 +49,14 @@ class Scene:
 
     def show(self):  # Возвращает текущие действия
         self.fon.draw(self.screen)
+        if self.q:
+            if isinstance(self.q[0], list):
+                if self.q[0][0] == "sa&":
+                    self.objects[self.q[0][1]].do(self.q[0][2:])
+                    self.q[0].remove("sa&")
+                elif not self.objects[self.q[0][0]].runAnim:
+                    self.q.pop(0)
+            # print(self.q)
         for obj in self.objects.values():
             if obj.transparency:
                 obj.draw(self.screen)
@@ -58,8 +66,6 @@ class Scene:
                     self.q.append(obj.tName)
             elif obj.tName in self.q:
                 self.q.remove(obj.tName)
-        if self.q:
-            print(self.q)
         return self.q
 
 

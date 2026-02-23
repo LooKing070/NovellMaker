@@ -161,7 +161,9 @@ class TextPlane(pygame.sprite.Sprite):
         self.line_spacing = line_spacing
         self.alignment = alignment  # 'left', 'center', 'right'
 
+        self.speaker = ""
         self.text = ""
+        self.speakerImage = None
         self.displayed_chars = 0  # количество отображённых символов
         self.mode = mode  # 1 -'char' или  0 -'word'
         self.word_boundaries: List[int] = []  # индексы окончаний слов
@@ -173,8 +175,18 @@ class TextPlane(pygame.sprite.Sprite):
 
         self.resize(1, 1)
 
-    def set_text(self, text: str, font: pygame.font.Font = None) -> None:
+    def set_text(self, speaker: str, text: str, font: pygame.font.Font = None) -> None:
         if font: self.font = font
+        if self.speaker != speaker:
+            self.speaker = speaker
+            layout = self._layout_text(speaker)
+            self.speakerImage = pygame.Surface(
+                (sum(self._get_char_width(char) for char in speaker), self.font.get_height()), pygame.SRCALPHA)
+            px, py = 0, 0
+            for line in layout:
+                for char, rel_x, rel_y in line:
+                    char_surf = self._get_cached_char(char)
+                    self.speakerImage.blit(char_surf, (px + rel_x, py))
         self.text = text
         self.displayed_chars = 0
         # Разбивка на строки с учётом ширины спрайта
@@ -321,6 +333,8 @@ class TextPlane(pygame.sprite.Sprite):
     def draw(self, surface: pygame.Surface) -> None:
         # 1. Отрисовываем фоновый спрайт
         surface.blit(self.image, self.rect.topleft)
+        surface.blit(self.speakerImage,
+                     (self.rect.x + self.padding, self.rect.y - self.line_spacing))
         # 2. Отрисовываем текст по кэшированным позициям
         drawn_chars = 0
         px, py = self.rect.topleft

@@ -102,8 +102,7 @@ class BindBox(Button):
 class Actor(Button):
     def __init__(self, parameters: dict, events: dict, text: dict):
         super().__init__(parameters, events, text)
-        pass
-        # self.name = TextPlane(textFonts, parameters["name"])
+        self.name = parameters["name"]
 
     def __str__(self):
         return "Actor"
@@ -113,7 +112,7 @@ class Actor(Button):
         if "say_" in event:
             result = []
             for i in range(0, len(self.events[event]), 2):
-                result += ["sa&", self.events[event][i], self.text[self.events[event][i+1]],
+                result += ["sa&", self.events[event][i], self.name, self.text[self.events[event][i+1]],
                            self.textFonts[self.events[event][i+1]] if self.events[event][i+1] in self.textFonts else None]
         elif "plot_" in event:
             self.plotScore += self.events[event]
