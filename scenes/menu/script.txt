@@ -1,11 +1,13 @@
 teacher - $
-11 - sdut_bruh
-2 - sdut_bruh
-0 - say_hay
+0 - sdut_bruh
 $
+ЭСфсЭЭ - &
+text_panel_t - tran_show
 teacher - say_hay
+&
 teacher - say_hello
 teacher - plot_1
+text_panel_t - tran_hide
 сысвс
 ЭСфсЭЭ - &
 teacher - sdut_bruh

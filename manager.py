@@ -66,8 +66,8 @@ class Manager(object):
             if isinstance(action, str) and action[:3] == "lo&":
                 self.choose_scene(action[3:])
             elif isinstance(action, list):
-                if action[0][:3] == "sa&":
-                    self.scene.objects[action[0][3:]].do(action[1])
+                if action[0] == "sa&":
+                    self.scene.objects[action[1]].do([action[2], action[3]])
         elif isinstance(action, list):  # после нажатия на кнопку
             for a in action:
                 if a:
@@ -85,6 +85,8 @@ class Manager(object):
         self.scene = self.scenes[scene]
         self.scene.music.play(-1)
         self.choose_resolution(self.screen, self.sceneCreator.screen.get_size())
+        for obj in self.scene.objects.values():
+            obj.set_transparency(obj.transparency)
 
     def choose_resolution(self, screen, oldRes):
         self.screen = screen

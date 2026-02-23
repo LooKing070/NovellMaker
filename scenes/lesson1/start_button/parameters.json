@@ -1,6 +1,6 @@
 {
   "name": "startButton",
-  "texture": ["alpha\\menu_settings_button.jpg+255", 1024, 750, 3, 1, 200, 1],
+  "texture": ["alpha\\menu_settings_button.jpg", 1024, 750, 3, 1, 200, 1],
   "sounds": ["zombie_deading.mp3", "perelom_kosti.mp3"],
   "speech": [1, "menuFont"]
 }

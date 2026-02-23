@@ -2,5 +2,5 @@
   "name": "JohnNiger",
   "texture": ["objects\\teacher.png", 30, 30, 1, 1,  0, 0.3],
   "sounds": ["zombie_deading.mp3", "perelom_kosti.mp3", "mouse_bind_info.mp3"],
-  "speech": ["1", "menuFont", "3реплика", "menuFont"]
+  "speech": ["1", "menuFont", "3реплика", "settingsFont"]
 }

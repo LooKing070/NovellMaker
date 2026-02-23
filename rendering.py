@@ -74,7 +74,7 @@ class Rendering(object):
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sheet, x=0, y=0, columns=1, rows=1, animationDelay=0, size=1):
+    def __init__(self, sheet, x=0, y=0, columns=1, rows=1, animationDelay=0, size=1, transparency=255):
         super().__init__()
         self.frames = []
         self._cut_sheet(sheet, columns, rows)
@@ -84,6 +84,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.animationTimer, self.animationDelay = 0, animationDelay
         self.runAnim = 0
         self.image = self.frames[self.currentFrame]
+        self.transparency = transparency
 
         self.rect.topleft = (x, y)
         self.resize(1, 1)
@@ -105,8 +106,10 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.rect.size = self.image.get_size()
 
     def set_transparency(self, coeff: int):
+        self.transparency = coeff
         for frame in range(len(self._savedFrames)):
             self.frames[frame].set_alpha(coeff)
+        if not coeff: self.runAnim = coeff
 
     def do_anim(self, currentFrame=0, endFrame=0, object=None):
         if not endFrame: endFrame = len(self.frames) - 1
@@ -131,8 +134,9 @@ class AnimatedSprite(pygame.sprite.Sprite):
 class TextPlane(pygame.sprite.Sprite):
     _GLOBAL_CHAR_CACHE = {}  # Глобальный кэш символов: {(шрифт, символ, цвет): поверхность}
 
-    def __init__(self, font: pygame.font.Font, texture: pygame.Surface, x0: int = 0, y0: int = 0,
-                 size: float = 1.0, padding: int = 15, line_spacing: int = 8, color: Tuple[int, int, int] = (0, 0, 0),
+    def __init__(self, font: pygame.font.Font, texture: pygame.Surface, x0: int = 0,
+                 y0: int = 0, size: float = 1.0, padding: int = 15,
+                 line_spacing: int = 8, color: Tuple[int, int, int] = (0, 0, 0), transparency: int = 0,
                  alignment: str = 'left', mode: int = 1, animationDelay: int = 40):
         """
         :param sprite: фоновая поверхность (прямоугольный спрайт)
@@ -146,8 +150,9 @@ class TextPlane(pygame.sprite.Sprite):
         self.image = texture
         self._sizeCo = size
         self._savedImage = texture
-        self.transparency = 255
+        self.transparency = transparency
         self.rect = self.image.get_rect()
+        self.x, self.y = x0, y0
         self.rect.topleft = (x0, y0)
 
         self.font = font
@@ -168,7 +173,8 @@ class TextPlane(pygame.sprite.Sprite):
 
         self.resize(1, 1)
 
-    def set_text(self, text: str) -> None:
+    def set_text(self, text: str, font: pygame.font.Font = None) -> None:
+        if font: self.font = font
         self.text = text
         self.displayed_chars = 0
         # Разбивка на строки с учётом ширины спрайта
@@ -176,6 +182,11 @@ class TextPlane(pygame.sprite.Sprite):
         self._total_chars = sum(len(line) for line in self._line_layouts)
         # Вычисление границ слов для пословного режима
         self.word_boundaries = self._calculate_word_boundaries()
+
+    def set_transparency(self, coeff: int):  # меняет прозрачность задней картинки
+        self.transparency = coeff
+        self.image.set_alpha(coeff)
+        if not coeff: self.runAnim = False
 
     def _layout_text(self, text: str) -> List[List[Tuple[str, int, int]]]:
         """
@@ -296,6 +307,16 @@ class TextPlane(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self._savedImage, (self._savedImage.get_width() * self._sizeCo * xCo,
                                                                self._savedImage.get_height() * self._sizeCo * yCo))
         self.rect.size = self.image.get_size()
+        drawn_chars = 0
+        """px, py = self.rect.topleft
+        for line in self._line_layouts:
+            if drawn_chars >= self.displayed_chars:
+                break
+            for char, rel_x, rel_y in line:
+                if drawn_chars >= self.displayed_chars:
+                    break
+                char_surf = self._get_cached_char(char)
+                drawn_chars += 1"""
 
     def draw(self, surface: pygame.Surface) -> None:
         # 1. Отрисовываем фоновый спрайт

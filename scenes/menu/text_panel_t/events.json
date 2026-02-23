@@ -1,3 +1,5 @@
 {
-  "on_click": []
+  "on_click": [],
+  "tran_show": 255,
+  "tran_hide": 0
 }

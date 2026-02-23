@@ -32,9 +32,9 @@ class Scene:
                 if type(event) == str:
                     result = self.objects[obj].do(event)
                 elif event[0] == '$':  # блок с выбором действия персонажем
-                    for pScore in range(1, len(event), 2):
-                        if pScore <= self.objects[obj].plotScore:
-                            result = self.objects[obj].do(event[pScore + 1])
+                    for i in range(1, len(event), 2):
+                        if event[i] <= self.objects[obj].plotScore:
+                            result = self.objects[obj].do(event[i + 1])
                             break
                 print(result)
                 self.action += 1
@@ -50,14 +50,14 @@ class Scene:
     def show(self):  # Возвращает текущие действия
         self.fon.draw(self.screen)
         for obj in self.objects.values():
-            if obj.image.get_alpha():
+            if obj.transparency:
                 obj.draw(self.screen)
                 obj.do_anim()
-                if obj.runAnim:
-                    if obj.tName not in self.q:
-                        self.q.append(obj.tName)
-                elif obj.tName in self.q:
-                    self.q.remove(obj.tName)
+            if obj.runAnim:
+                if obj.tName not in self.q:
+                    self.q.append(obj.tName)
+            elif obj.tName in self.q:
+                self.q.remove(obj.tName)
         if self.q:
             print(self.q)
         return self.q

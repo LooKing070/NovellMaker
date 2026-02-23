@@ -14,7 +14,7 @@ class Button(AnimatedSprite):
         self.events = events
         self.text = text
         self.sounds = parameters["sounds"]
-        textFonts = parameters["speech"]
+        self.textFonts = parameters["speech"]
         self.tName = parameters["tName"]  # техническое имя
 
         self.clicks = 0
@@ -113,7 +113,8 @@ class Actor(Button):
         if "say_" in event:
             result = []
             for i in range(0, len(self.events[event]), 2):
-                result += ["sa&" + self.events[event][i], self.text[self.events[event][i+1]]]
+                result += ["sa&", self.events[event][i], self.text[self.events[event][i+1]],
+                           self.textFonts[self.events[event][i+1]] if self.events[event][i+1] in self.textFonts else None]
         elif "plot_" in event:
             self.plotScore += self.events[event]
             result = self.tName
@@ -124,7 +125,10 @@ class Dialog(TextPlane):
     def __init__(self, parameters: dict, events: dict, font: pygame.font.Font):
         super().__init__(font, *parameters["texture"])
         self.tName = parameters["tName"]
+        self.sounds = parameters["sounds"]
         self.clicks = 0
+        self.events = events
+        self.events["paus_"] = None
 
     def __str__(self):
         return "Dialog"
@@ -133,14 +137,35 @@ class Dialog(TextPlane):
         if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
                 self.rect.y <= pos[1] <= self.rect.y + self.rect.h and self.image.get_alpha() > 0:
             self.clicks += 1
-            return self.do('')
+            return self.do("paus_")
         return False
 
-    def do(self, text):
+    def do(self, event):
         result = ''
-        self.set_text(text)
-        self.runAnim = True
+        if isinstance(event, list):
+            result = self.tName
+            self.runAnim = True
+            self.set_text(*event)
+        elif event in self.events:
+            if "on_" in event:
+                result = [self.do(eS) for eS in self.events[event]]
+            elif "tran_" in event:
+                self.set_transparency(self.events[event])
+                result = self.tName
+            elif "paus_" in event:
+                self.runAnim = not self.runAnim
+                result = self.tName
+            else:
+                pass
+                # result = self._do(event)
+        else:
+            print(self.tName, "ERROR: THERE IS NO SUCH EVENT")
         return result
+
+    def update(self, size=()):
+        self.resize(size[0], size[1])
+        self.rect.x = self.x * size[0]
+        self.rect.y = self.y * size[1]
 
 
 class Inventory(sprite.Sprite):
@@ -188,11 +213,21 @@ class ObjectsCreator(object):
                         elif "parameters" in f:
                             parameters = {k: v for k, v in json.load(file).items()}
                             parameters["tName"] = currentDir
-                            parameters["texture"][0] = self.render.set_texture(*parameters["texture"][0].split('+'))
+                            if "texture" in parameters:
+                                if len(parameters["texture"]) < 8:
+                                    parameters["texture"][0] = self.render.set_texture(parameters["texture"][0])
+                                else:
+                                    parameters["texture"][0] = self.render.set_texture(parameters["texture"][0],
+                                                                                       parameters["texture"][7])
                             sounds = {}
                             for i in range(len(parameters["sounds"])):
                                 sounds[parameters["sounds"][i][:-4]] = self.sounder.load_sound(parameters["sounds"][i])
                             parameters["sounds"] = sounds
+                            if "speech" in parameters:
+                                textFonts = {}
+                                for i in range(0, len(parameters["speech"]), 2):
+                                    textFonts[parameters["speech"][i]] = self.render.fonts[parameters["speech"][i+1]]
+                                parameters["speech"] = textFonts
                 elif ".txt" == f[-4:]:
                     with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="UTF8") as text:
                         for string in text.readlines():
