@@ -1,5 +1,5 @@
 import pygame
-import os
+from builder import resource_path
 from events import event_check
 from manager import Manager
 from rendering import Rendering
@@ -9,12 +9,12 @@ def main():
     pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
     windowTypes = {"resizable": pygame.RESIZABLE, "scaled": pygame.SCALED}
-    with open(os.path.abspath("p_data\\nm.txt"), 'r', encoding="UTF8") as nm_par:
+    with open(resource_path(["p_data", "nm.txt"]), 'r', encoding="UTF8") as nm_par:
         windowType = nm_par.readline().lower().rstrip()
         windowRes = [int(i) for i in nm_par.readline().split()]
         screen = pygame.display.set_mode(windowRes, windowTypes[windowType])  # sssx, vsync=1
         pygame.display.set_caption(nm_par.readline().rstrip())
-        pygame.display.set_icon(Rendering.load_texture(os.path.abspath("textures\\NM_icon.png")))
+        pygame.display.set_icon(Rendering.load_texture(resource_path(["textures", "NM_icon.png"])))
 
     vScreen = pygame.Surface(screen.get_size())
     manager = Manager(vScreen)

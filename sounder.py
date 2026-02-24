@@ -1,5 +1,5 @@
-import os
 import pygame
+from builder import resource_path
 
 
 class Sounder(object):
@@ -11,16 +11,14 @@ class Sounder(object):
         return cls.__instance
 
     def __init__(self):
-        self._music_path = os.path.abspath("sounds\\fon_music")
-        self._sounds_path = os.path.abspath("sounds\\interaction_sounds")
         self._sounds = {}
 
     def load_fon_music(self, fileName: str) -> pygame.mixer.Sound:
         if fileName not in self._sounds:
-            self._sounds[fileName] = pygame.mixer.Sound(f"{self._music_path}\\{fileName}")
+            self._sounds[fileName] = pygame.mixer.Sound(resource_path(["sounds", "fon_music", f"{fileName}"]))
         return self._sounds[fileName]
 
     def load_sound(self, fileName: str) -> pygame.mixer.Sound:
         if fileName not in self._sounds:
-            self._sounds[fileName] = pygame.mixer.Sound(f"{self._sounds_path}\\{fileName}")
+            self._sounds[fileName] = pygame.mixer.Sound(resource_path(["sounds", "interaction_sounds", f"{fileName}"]))
         return self._sounds[fileName]

@@ -1,6 +1,7 @@
-import os
 import json
+import os
 import pygame
+from builder import resource_path
 from rendering import Rendering
 from objects import ObjectsCreator
 from sounder import Sounder
@@ -117,20 +118,20 @@ class SceneCreator(object):
         objects = []
         script = []
         sceneType = ''
-        path = f"{self.path}\\{sceneName}"
-        with open(f"{path}\\parameters.json", 'r', encoding="utf-8") as par_file:
+        path = os.path.join(self.path, sceneName)
+        with open(os.path.join(path, "parameters.json"), 'r', encoding="utf-8") as par_file:
             for key, value in json.load(par_file).items():
                 if key == "scene_type":
                     sceneType = value
                 elif key == "fon":
-                    value[0] = os.path.abspath(f"textures\\bg\\{value[0]}")
+                    value[0] = resource_path(["textures", "bg", f"{value[0]}"])
                     if len(value) == 1: value += [255, 1, 1, 1000, self.screen.get_width()]
                     fon = Rendering.load_fon(*value)
                 elif key == "music":
                     music = self.sounder.load_fon_music(value)
                 else:
                    objects = self._load_objects(path, value)
-        with open(f"{path}\\script.txt", 'r', encoding="utf-8") as scr_file:
+        with open(os.path.join(path, "script.txt"), 'r', encoding="utf-8") as scr_file:
             s = [el.rstrip('\n') for el in scr_file.readlines() if el]
             action = []
             for i in range(len(s)):

@@ -1,6 +1,5 @@
 import os
 import json
-
 import pygame.font
 from pygame import sprite
 from rendering import AnimatedSprite, TextPlane, Rendering
@@ -204,9 +203,9 @@ class ObjectsCreator(object):
     def create(self, path, currentDir, objectType):
         if objectType in self.objectTypes:
             events, parameters, speech = {}, {}, {}
-            for f in os.listdir(f"{path}\\{currentDir}"):
+            for f in os.listdir(os.path.join(path, currentDir)):
                 if ".json" in f:
-                    with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="utf-8") as file:
+                    with open(os.path.join(path, currentDir, f), 'r', encoding="utf-8") as file:
                         if "events" in f:
                             events = {k: v for k, v in json.load(file).items()}
                         elif "parameters" in f:
@@ -228,7 +227,7 @@ class ObjectsCreator(object):
                                     textFonts[parameters["speech"][i]] = self.render.fonts[parameters["speech"][i+1]]
                                 parameters["speech"] = textFonts
                 elif ".txt" == f[-4:]:
-                    with open(f"{path}\\{currentDir}\\{f}", 'r', encoding="UTF8") as text:
+                    with open(os.path.join(path, currentDir, f), 'r', encoding="UTF8") as text:
                         for string in text.readlines():
                             string = string.rstrip()
                             if string[-1] == string[0] == '&':

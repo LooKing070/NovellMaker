@@ -2,6 +2,7 @@ import os
 import pygame
 import csv
 import json
+from builder import resource_path
 from scener import SceneCreator
 
 
@@ -16,8 +17,8 @@ class Manager(object):
     def __init__(self, screen):
         self.screen = screen
 
-        self.dataPath = os.path.abspath("p_data")
-        self.scenePath = os.path.abspath("scenes")
+        self.dataPath = resource_path(["p_data"])
+        self.scenePath = resource_path(["scenes"])
 
         self.sceneCreator = SceneCreator(self.screen, self.scenePath)
 
@@ -32,14 +33,15 @@ class Manager(object):
         # self.sceneCreator.render.play_video(self.screen, "NMintro.mp4")
 
     def open_login_save(self):
-        with open(f"{self.dataPath}\\login.csv", "r", newline="", encoding="utf-8") as loginFile:
+        with open(os.path.join(self.dataPath, "login.csv"), "r", newline="", encoding="utf-8") as loginFile:
             playerLoginSave = csv.DictReader(loginFile, delimiter=',', quotechar='\n')
             for line in playerLoginSave:
                 playerLoginSave = dict(line)
         return {k: v.split() if ' ' in v else v for k, v in playerLoginSave.items()}
 
     def open_settings(self):
-        with open(f"{self.dataPath}\\local_settings.csv", "r", newline="", encoding="utf-8") as settingsFile:
+        with open(os.path.join(self.dataPath, "local_settings.csv"), "r", newline="", encoding="utf-8")\
+                as settingsFile:
             settings = csv.DictReader(settingsFile, delimiter=',', quotechar='\n')
             for line in settings:
                 settings = dict(line)
@@ -49,7 +51,7 @@ class Manager(object):
         return settings
 
     def save_settings(self):
-        with open(f"{self.dataPath}\\local_settings.csv", "w", newline="", encoding="utf-8") as settingsFile:
+        with open(os.path.join(self.dataPath, "local_settings.csv"), "w", newline="", encoding="utf-8") as settingsFile:
             writer = csv.DictWriter(settingsFile, list(self.localSettings.keys()))
             saveSettings = {k: ' '.join([str(i) for i in v]) if type(v) == list else str(v)
                             for k, v in self.localSettings.items()}

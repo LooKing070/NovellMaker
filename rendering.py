@@ -2,6 +2,7 @@ import os
 import pygame
 import json
 import av
+from builder import resource_path
 from typing import Tuple, List, Optional
 
 
@@ -14,31 +15,32 @@ class Rendering(object):
         return cls.__instance
 
     def __init__(self):
-        self._texPath = os.path.abspath("textures")
-        self._fontsPath = os.path.abspath("fonts")
-        self._videosPath = os.path.abspath("videos")
+        self._texPath = resource_path(["textures"])
+        self._fontsPath = resource_path(["fonts"])
+        self._videosPath = resource_path(["videos"])
 
         self._vidContainer = []
         self._currentVidFrame = True
         self.textures = {}
         self.fonts = {"default": pygame.font.SysFont("arial", 20)}
 
-        with open(f"{self._fontsPath}\\parameters.json") as fontsPar:
+        with open(os.path.join(self._fontsPath, "parameters.json")) as fontsPar:
             for name, font in json.load(fontsPar).items():
                 if "Font" in name:
-                    self.fonts[name] = pygame.font.Font(f"{self._fontsPath}\\{font[0]}", font[1])
+                    self.fonts[name] = pygame.font.Font(os.path.join(self._fontsPath, font[0]), font[1])
                 else:
                     self.fonts[name] = self.fonts[font]
 
     def set_texture(self, texName, alfa=255):
-        if texName not in self.textures:
-            tex = pygame.image.load(f"{self._texPath}\\{texName}")
+        texName = texName.split("\\")
+        if texName[-1] not in self.textures:
+            tex = pygame.image.load(os.path.join(self._texPath, *texName))
             if "alpha" in texName:
                 tex.set_colorkey(tex.get_at((0, 0)))
             tex.set_alpha(int(alfa))
             tex = tex.convert_alpha()
-            self.textures[texName] = tex
-        return self.textures[texName]
+            self.textures[texName[-1]] = tex
+        return self.textures[texName[-1]]
 
     @staticmethod
     def load_texture(path, alfa=255):
@@ -64,7 +66,7 @@ class Rendering(object):
 
     def play_video(self, screen, videoName=''):
         if videoName:
-            self._vidContainer = av.open(self._videosPath + f"\\{videoName}").decode(video=0)
+            self._vidContainer = av.open(os.path.join(self._videosPath, videoName)).decode(video=0)
         if self._currentVidFrame:
             self._currentVidFrame = self.get_video_frame(screen, self._vidContainer)
         return self._currentVidFrame
