@@ -1,5 +1,5 @@
 import pygame
-from builder import resource_path
+from builder import resource_path, save_path
 from events import event_check
 from manager import Manager
 from rendering import Rendering
@@ -9,7 +9,7 @@ def main():
     pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
     windowTypes = {"resizable": pygame.RESIZABLE, "scaled": pygame.SCALED}
-    with open(resource_path(["p_data", "nm.txt"]), 'r', encoding="UTF8") as nm_par:
+    with open(save_path(["nm.txt"]), 'r', encoding="UTF8") as nm_par:
         windowType = nm_par.readline().lower().rstrip()
         windowRes = [int(i) for i in nm_par.readline().split()]
         screen = pygame.display.set_mode(windowRes, windowTypes[windowType])  # sssx, vsync=1

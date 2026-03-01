@@ -18,21 +18,9 @@ def get_base_path():
 
 
 def resource_path(dirs: list):
-    return os.path.join(get_base_path(), *dirs)
+    return os.path.join(get_base_path(), "assets", *dirs)
 
 
-def get_save_path():
-    if platform.system() == "Windows":
-        base = os.getenv('APPDATA')
-        app_name = "MyGame"
-    elif platform.system() == "Darwin": # macOS
-        base = os.path.expanduser("~/Library/Application Support")
-        app_name = "MyGame"
-    else: # Linux
-        base = os.path.expanduser("~/.local/share")
-        app_name = "mygame"
-    dir_path = os.path.join(base, app_name)
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-    return dir_path
+def save_path(dirs: list):
+    return os.path.join(get_base_path(), "p_data", *dirs)
 

@@ -2,7 +2,7 @@ import os
 import pygame
 import csv
 import json
-from builder import resource_path
+from builder import resource_path, save_path
 from scener import SceneCreator
 
 
@@ -17,7 +17,7 @@ class Manager(object):
     def __init__(self, screen):
         self.screen = screen
 
-        self.dataPath = resource_path(["p_data"])
+        self.dataPath = save_path([])
         self.scenePath = resource_path(["scenes"])
 
         self.sceneCreator = SceneCreator(self.screen, self.scenePath)
