@@ -1,7 +1,7 @@
 import os
 import pygame
 import json
-import av
+#  import pyvidplayer2
 from builder import resource_path
 from typing import Tuple, List, Optional
 
@@ -65,11 +65,7 @@ class Rendering(object):
         return None
 
     def play_video(self, screen, videoName=''):
-        if videoName:
-            self._vidContainer = av.open(os.path.join(self._videosPath, videoName)).decode(video=0)
-        if self._currentVidFrame:
-            self._currentVidFrame = self.get_video_frame(screen, self._vidContainer)
-        return self._currentVidFrame
+        pass
 
     def play_screen_saver(self):
         return
