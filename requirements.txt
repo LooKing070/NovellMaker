@@ -1,2 +1,2 @@
 pygame==2.6.1
-av==16.1.0
+pyvidplayer2==0.9.30
