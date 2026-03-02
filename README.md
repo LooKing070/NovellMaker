@@ -1,6 +1,6 @@
 # ![logo](https://github.com/LooKing070/NovellMaker/blob/main/assets/textures/NM_icon.png) Novell Maker
 ### Latest release | Новейший билд
-+ [download]() | [скачать]()
++ [download](https://github.com/LooKing070/NovellMaker/releases) | [скачать](https://github.com/LooKing070/NovellMaker/releases)
 + [documentation](https://github.com/LooKing070/NovellMaker/tree/main/documentation/eng) | [документация](https://github.com/LooKing070/NovellMaker/tree/main/documentation/ru)
 
 ### Description | Описание
