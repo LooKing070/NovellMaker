@@ -19,6 +19,7 @@ class Scene:
         self.music = music
         self.script = script  # [[obj, [event]], [obj, [event]], ]
         self.action = 0
+        self.plotScore = 0
         self.q = []  # очередь из ивентов
         self.objects = {}
         for obj in objects:

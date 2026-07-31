@@ -79,7 +79,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self._sizeCo = size
         self._savedFrames = self.frames[::]
         self.currentFrame = 0
-        self.animationTimer, self.animationDelay = 0, animationDelay
+        self.animationTimer, self.animationDelay = 0, animationDelay // len(self.frames)
         self.runAnim = 0
         self.image = self.frames[self.currentFrame]
         self.transparency = transparency

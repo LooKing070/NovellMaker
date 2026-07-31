@@ -17,7 +17,6 @@ class Button(AnimatedSprite):
         self.tName = parameters["tName"]  # техническое имя
 
         self.clicks = 0
-        self.plotScore = 0
 
     def __str__(self):
         return "Button"
@@ -113,9 +112,9 @@ class Actor(Button):
             for i in range(0, len(self.events[event]), 2):
                 result += ["sa&", self.events[event][i], self.name, self.text[self.events[event][i+1]],
                            self.textFonts[self.events[event][i+1]] if self.events[event][i+1] in self.textFonts else None]
-        elif "plot_" in event:
+        """elif "plot_" in event:
             self.plotScore += self.events[event]
-            result = self.tName
+            result = self.tName"""
         return result
 
 
