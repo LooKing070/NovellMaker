@@ -2,7 +2,6 @@ import json
 import os
 import pygame
 from builder import resource_path
-from rendering import Rendering
 from objects import ObjectsCreator
 from sounder import Sounder
 
@@ -118,20 +117,19 @@ class SceneCreator(object):
         music = None
         objects = []
         script = []
-        sceneType = ''
+        sceneType = "conversation"
         path = os.path.join(self.path, sceneName)
         with open(os.path.join(path, "parameters.json"), 'r', encoding="utf-8") as par_file:
-            for key, value in json.load(par_file).items():
-                if key == "scene_type":
-                    sceneType = value
-                elif key == "fon":
-                    value[0] = resource_path(["textures", "bg", f"{value[0]}"])
-                    if len(value) == 1: value += [255, 1, 1, 1000, self.screen.get_width()]
-                    fon = Rendering.load_fon(*value)
-                elif key == "music":
-                    music = self.sounder.load_fon_music(value)
-                else:
-                   objects = self._load_objects(path, value)
+            file = dict(json.load(par_file).items())
+            if len(file) > 0:
+                if file["type"] in ["conversation", "activity", "baseScene"]:
+                    sceneType = file.pop("type")
+                    music = file.pop("music")
+                    if "texture" in file: file["texture"] = self.objectsCreator.render.set_texture(file["texture"])
+                    fon = self.objectsCreator.objectTypes["Picture"](file)
+                    objects.append(fon)
+
+        objects += self._load_objects(path)
         with open(os.path.join(path, "script.txt"), 'r', encoding="utf-8") as scr_file:
             s = [el.rstrip('\n') for el in scr_file.readlines() if el]
             action = []
@@ -154,9 +152,11 @@ class SceneCreator(object):
                         pass
         return self.scenes[sceneType](sceneName, self.screen, fon, music, objects, script)
 
-    def _load_objects(self, path: str, objects: list):  # Загрузка объектов (кнопок) в этой сцене
-        newObjects = []
-        for currentDir, objectType in objects:
-            obj = self.objectsCreator.create(path, currentDir, objectType)
-            if obj: newObjects.append(obj)
-        return newObjects
+    def _load_objects(self, path: str):  # Загрузка объектов (кнопок) в этой сцене
+        objects = []
+        with os.scandir(path) as currentDirs:
+            for currentDir in currentDirs:
+                if currentDir.is_dir():
+                    obj = self.objectsCreator.create(path, currentDir.name)
+                    if obj: objects.append(obj)
+        return objects

@@ -31,13 +31,12 @@ class Rendering(object):
                 else:
                     self.fonts[name] = self.fonts[font]
 
-    def set_texture(self, texName, alfa=255):
+    def set_texture(self, texName):
         texName = texName.split("\\")
         if texName[-1] not in self.textures:
             tex = pygame.image.load(os.path.join(self._texPath, *texName))
             if "alpha" in texName:
                 tex.set_colorkey(tex.get_at((0, 0)))
-            tex.set_alpha(int(alfa))
             tex = tex.convert_alpha()
             self.textures[texName[-1]] = tex
         return self.textures[texName[-1]]
@@ -48,12 +47,6 @@ class Rendering(object):
         tex.set_alpha(int(alfa))
         tex = tex.convert_alpha()
         return tex
-
-    @staticmethod
-    def load_fon(texPath, alfa=255, cols=1, rows=1, animaD=1000, sk=1):
-        sheet = Rendering.load_texture(texPath, alfa)
-        size = sk / sheet.get_rect().w
-        return Fon((sheet, 0, 0, cols, rows, animaD, size))
 
     @staticmethod
     def get_video_frame(screen, vidContainer):
@@ -72,19 +65,20 @@ class Rendering(object):
 
 
 class AnimatedSprite(pygame.sprite.Sprite):
-    def __init__(self, sheet, x=0, y=0, columns=1, rows=1, animationDelay=0, size=1, transparency=255):
+    def __init__(self, texture, top_left: Tuple[int, int] = (0, 0), anim_cut: Tuple[int, int] = (1, 1), anim_speed=0,
+                 size_co: float = 1.0, transparency=255):
         super().__init__()
         self.frames = []
-        self._cut_sheet(sheet, columns, rows)
-        self._sizeCo = size
+        self._cut_sheet(texture, *anim_cut)
+        self._sizeCo = size_co
         self._savedFrames = self.frames[::]
         self.currentFrame = 0
-        self.animationTimer, self.animationDelay = 0, animationDelay // len(self.frames)
+        self.animationTimer, self.animationDelay = 0, anim_speed // len(self.frames)
         self.runAnim = 0
         self.image = self.frames[self.currentFrame]
         self.transparency = transparency
 
-        self.rect.topleft = (x, y)
+        self.rect.topleft = top_left
         self.resize(1, 1)
 
     def _cut_sheet(self, sheet, columns, rows):
@@ -132,40 +126,39 @@ class AnimatedSprite(pygame.sprite.Sprite):
 class TextPlane(pygame.sprite.Sprite):
     _GLOBAL_CHAR_CACHE = {}  # Глобальный кэш символов: {(шрифт, символ, цвет): поверхность}
 
-    def __init__(self, font: pygame.font.Font, texture: pygame.Surface, x0: int = 0,
-                 y0: int = 0, size: float = 1.0, padding: int = 15,
-                 line_spacing: int = 8, color: Tuple[int, int, int] = (0, 0, 0), transparency: int = 0,
-                 alignment: str = 'left', mode: int = 1, animationDelay: int = 40):
+    def __init__(self, font: pygame.font.Font, texture: pygame.Surface, top_left=(0, 0), size_co: float = 1.0,
+                 padding: int = 15, line_spacing: int = 8, text_color: Tuple[int, int, int] = (0, 0, 0),
+                 transparency: int = 0, text_alignment: str = 'left', print_mode: int = 1, print_speed: int = 40):
         """
-        :param sprite: фоновая поверхность (прямоугольный спрайт)
+        :param texture: фоновая поверхность (прямоугольный спрайт)
         :param font: шрифт Pygame для рендеринга текста
-        :param color: цвет текста (R, G, B)
+        :param text_color: цвет текста (R, G, B)
         :param padding: отступы текста от краёв спрайта
         :param line_spacing: дополнительный интервал между строками
-        :param alignment: выравнивание текста внутри спрайта
+        :param text_alignment: выравнивание текста внутри спрайта
         """
         super().__init__()
         self.image = texture
-        self._sizeCo = size
+        self._sizeCo = size_co
         self._savedImage = texture
         self.transparency = transparency
         self.rect = self.image.get_rect()
-        self.x, self.y = x0, y0
-        self.rect.topleft = (x0, y0)
+        self.x, self.y = top_left
+        self.rect.topleft = top_left
 
         self.font = font
-        self.color = tuple(color)
+        self.color = tuple(text_color)
         self.padding = padding
         self.line_spacing = line_spacing
-        self.alignment = alignment  # 'left', 'center', 'right'
+        self.alignment = text_alignment  # 'left', 'center', 'right'
 
         self.speaker = ""
         self.text = ""
         self.speakerImage = None
         self.displayed_chars = 0  # количество отображённых символов
-        self.mode = mode  # 1 -'char' или  0 -'word'
+        self.mode = print_mode  # 1 -'char' или  0 -'word'
         self.word_boundaries: List[int] = []  # индексы окончаний слов
-        self.animationTimer, self.animationDelay = 0, animationDelay
+        self.animationTimer, self.animationDelay = 0, print_speed
         self.runAnim = False
 
         self._line_layouts: List[List[Tuple[str, int, int]]] = []  # [(символ, x, y), ...]
@@ -348,13 +341,3 @@ class TextPlane(pygame.sprite.Sprite):
 
     def get_progress(self) -> float:  # return: 0-100%
         return min(1.0, self.displayed_chars / max(1, self._total_chars))
-
-
-class Fon(AnimatedSprite):
-    def __init__(self, textureParameters):
-        super().__init__(*textureParameters)
-
-    def update(self, size=()):
-        if size:
-            self.resize(size[0], size[1])
-

@@ -7,8 +7,8 @@ from sounder import Sounder
 
 
 class Button(AnimatedSprite):
-    def __init__(self, parameters: dict, events: dict, text: dict):
-        super().__init__(*parameters["texture"])
+    def __init__(self, visual: dict, parameters: dict, events: dict, text: dict = None):
+        super().__init__(**visual)
         self.x, self.y = self.rect.x, self.rect.y
         self.events = events
         self.text = text
@@ -64,13 +64,11 @@ class Button(AnimatedSprite):
 
 
 class VideoPlayer:
-    def __init__(self, parameters: dict, events: dict, text: dict):
+    def __init__(self, visual: dict, parameters: dict, events: dict, text: dict):
         self.screen = parameters["screen"]
         self.sounds = parameters["sounds"]
         self.tName = parameters["tName"]
         self.events = events
-
-        self.plotScore = 0
 
     def __str__(self):
         return "VidPlr"
@@ -89,8 +87,8 @@ class VideoPlayer:
 
 
 class BindBox(Button):
-    def __init__(self, parameters: dict, events: dict, text: dict):
-        super().__init__(parameters, events, text)
+    def __init__(self, visual: dict, parameters: dict, events: dict, text: dict):
+        super().__init__(visual, parameters, events, text)
         self.tName = parameters["tName"]
 
     def __str__(self):
@@ -98,8 +96,8 @@ class BindBox(Button):
 
 
 class Actor(Button):
-    def __init__(self, parameters: dict, events: dict, text: dict):
-        super().__init__(parameters, events, text)
+    def __init__(self, visual: dict, parameters: dict, events: dict, text: dict):
+        super().__init__(visual, parameters, events, text)
         self.name = parameters["name"]
 
     def __str__(self):
@@ -119,8 +117,8 @@ class Actor(Button):
 
 
 class Dialog(TextPlane):
-    def __init__(self, parameters: dict, events: dict, font: pygame.font.Font):
-        super().__init__(font, *parameters["texture"])
+    def __init__(self, visual: dict, parameters: dict, events: dict, font: pygame.font.Font):
+        super().__init__(font, **visual)
         self.tName = parameters["tName"]
         self.sounds = parameters["sounds"]
         self.clicks = 0
@@ -166,7 +164,7 @@ class Dialog(TextPlane):
 
 
 class Inventory(sprite.Sprite):
-    def __init__(self, parameters: dict, events: dict, text: dict):
+    def __init__(self, visual: dict, parameters: dict, events: dict, text: dict):
         super().__init__()
         self._cols = 8
         self._rows = 3
@@ -185,6 +183,15 @@ class Inventory(sprite.Sprite):
         return result
 
 
+class Picture(AnimatedSprite):
+    def __init__(self, visual: dict, parameters: dict = None, events: dict = None, text: dict = None):
+        super().__init__(**visual)
+
+    def update(self, size=()):
+        if size:
+            self.resize(size[0], size[1])
+
+
 class ObjectsCreator(object):
     __instance = None
 
@@ -197,46 +204,45 @@ class ObjectsCreator(object):
         self.render = Rendering()
         self.sounder = Sounder()
         self.objectTypes = {"Button": Button, "BinBox": BindBox, "VidPlr": VideoPlayer, "Actor": Actor,
-                            "Inventory": Inventory, "Dialog": Dialog}
+                            "Inventory": Inventory, "Dialog": Dialog, "Picture": Picture}
 
-    def create(self, path, currentDir, objectType):
-        if objectType in self.objectTypes:
-            events, parameters, speech = {}, {}, {}
-            for f in os.listdir(os.path.join(path, currentDir)):
-                if ".json" in f:
-                    with open(os.path.join(path, currentDir, f), 'r', encoding="utf-8") as file:
-                        if "events" in f:
-                            events = {k: v for k, v in json.load(file).items()}
-                        elif "parameters" in f:
-                            parameters = {k: v for k, v in json.load(file).items()}
-                            parameters["tName"] = currentDir
-                            if "texture" in parameters:
-                                if len(parameters["texture"]) < 8:
-                                    parameters["texture"][0] = self.render.set_texture(parameters["texture"][0])
-                                else:
-                                    parameters["texture"][0] = self.render.set_texture(parameters["texture"][0],
-                                                                                       parameters["texture"][7])
+    def create(self, path, currentDir):
+        events, parameters, speech, visual = {}, {}, {}, {}
+        objectType = ''
+        for f in os.listdir(os.path.join(path, currentDir)):
+            if ".json" in f:
+                with open(os.path.join(path, currentDir, f), 'r', encoding="utf-8") as file:
+                    if "events" in f:
+                        events = {k: v for k, v in json.load(file).items()}
+                    elif "parameters" in f:
+                        for k, v in json.load(file).items():
+                            if k in ["type", "sounds", "buttons", "owners", "music", "name", "speech"]:
+                                parameters[k] = v
+                            else: visual[k] = v
+                        objectType = parameters["type"]
+                        parameters["tName"] = currentDir
+                        if "texture" in visual: visual["texture"] = self.render.set_texture(visual["texture"])
+                        if "sounds" in parameters:
                             sounds = {}
                             for i in range(len(parameters["sounds"])):
                                 sounds[parameters["sounds"][i][:-4]] = self.sounder.load_sound(parameters["sounds"][i])
                             parameters["sounds"] = sounds
-                            if "speech" in parameters:
-                                textFonts = {}
-                                for i in range(0, len(parameters["speech"]), 2):
-                                    textFonts[parameters["speech"][i]] = self.render.fonts[parameters["speech"][i+1]]
-                                parameters["speech"] = textFonts
-                elif ".txt" == f[-4:]:
-                    with open(os.path.join(path, currentDir, f), 'r', encoding="UTF8") as text:
-                        for string in text.readlines():
-                            string = string.rstrip()
-                            if string[-1] == string[0] == '&':
-                                title = string[1:-1]
-                                speech[title] = ""
-                            else:
-                                speech[title] += string + ' '
-            if objectType == "Dialog":
-                speech = self.render.fonts["default"]
-            return self.objectTypes[objectType](parameters, events, speech)
-        else:
-            print(f"ERROR: WRONG OBJECT TYPE - {objectType}")
-            return None
+                        if "speech" in parameters:
+                            textFonts = {}
+                            for i in range(0, len(parameters["speech"]), 2):
+                                textFonts[parameters["speech"][i]] = self.render.fonts[parameters["speech"][i+1]]
+                            parameters["speech"] = textFonts
+
+            elif ".txt" == f[-4:]:
+                with open(os.path.join(path, currentDir, f), 'r', encoding="UTF8") as text:
+                    for string in text.readlines():
+                        string = string.rstrip()
+                        if string[-1] == string[0] == '&':
+                            title = string[1:-1]
+                            speech[title] = ""
+                        else:
+                            speech[title] += string + ' '
+
+        if objectType == "Dialog":
+            speech = self.render.fonts["default"]
+        return self.objectTypes[objectType](visual, parameters, events, speech)
