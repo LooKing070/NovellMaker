@@ -186,6 +186,8 @@ class Inventory(sprite.Sprite):
 class Picture(AnimatedSprite):
     def __init__(self, visual: dict, parameters: dict = None, events: dict = None, text: dict = None):
         super().__init__(**visual)
+        if parameters and "tName" in parameters: self.tName = parameters["tName"]  # техническое имя
+        else: self.tName = "fon"
 
     def update(self, size=()):
         if size:
@@ -219,7 +221,7 @@ class ObjectsCreator(object):
                             if k in ["type", "sounds", "buttons", "owners", "music", "name", "speech"]:
                                 parameters[k] = v
                             else: visual[k] = v
-                        objectType = parameters["type"]
+                        if "type" in parameters: objectType = parameters["type"]
                         parameters["tName"] = currentDir
                         if "texture" in visual: visual["texture"] = self.render.set_texture(visual["texture"])
                         if "sounds" in parameters:
@@ -245,4 +247,7 @@ class ObjectsCreator(object):
 
         if objectType == "Dialog":
             speech = self.render.fonts["default"]
+        if objectType not in self.objectTypes:
+            print(f"ERROR: OBJECT_TYPE '{objectType}' IS NOT EXIST")
+            return None
         return self.objectTypes[objectType](visual, parameters, events, speech)

@@ -124,7 +124,7 @@ class SceneCreator(object):
             if len(file) > 0:
                 if file["type"] in ["conversation", "activity", "baseScene"]:
                     sceneType = file.pop("type")
-                    music = file.pop("music")
+                    music = self.sounder.load_fon_music(file.pop("music"))
                     if "texture" in file: file["texture"] = self.objectsCreator.render.set_texture(file["texture"])
                     fon = self.objectsCreator.objectTypes["Picture"](file)
                     objects.append(fon)
