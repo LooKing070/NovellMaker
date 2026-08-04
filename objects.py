@@ -170,9 +170,18 @@ class Inventory(sprite.Sprite):
         self._rows = 3
         self._bagesInterval = 10  # толщина линий между ячейками
         self.cellSize = 80
+        self.cells = []
+        self.currentCell = 0
 
     def __str__(self):
         return "Inventory"
+
+    def check_click(self, pos):
+        if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
+                self.rect.y <= pos[1] <= self.rect.y + self.rect.h and self.image.get_alpha() > 0:
+            self.clicks += 1
+            return self.do("choose_")
+        return False
 
     def do(self, event=""):
         result = ''
@@ -188,6 +197,13 @@ class Picture(AnimatedSprite):
         super().__init__(**visual)
         if parameters and "tName" in parameters: self.tName = parameters["tName"]  # техническое имя
         else: self.tName = "fon"
+        self.clicks = 0
+
+    def check_click(self, pos):
+        if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
+                self.rect.y <= pos[1] <= self.rect.y + self.rect.h and self.image.get_alpha() > 0:
+            self.clicks += 1
+        return False
 
     def update(self, size=()):
         if size:
