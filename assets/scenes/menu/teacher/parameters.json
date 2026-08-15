@@ -1,6 +1,10 @@
 {
   "name": "JohnNiger",
+  "type": "Actor",
   "texture": "objects\\teacher.png",
+  "size_co": 0.2,
+  "top_left": [0, 0],
+  "transparency": 100,
   "sounds": ["zombie_deading.mp3", "perelom_kosti.mp3", "mouse_bind_info.mp3"],
   "speech": ["1", "menuFont", "3реплика", "settingsFont"]
 }

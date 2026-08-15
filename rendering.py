@@ -79,7 +79,6 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.transparency = transparency
 
         self.rect.topleft = top_left
-        self.resize(1, 1)
 
     def _cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
@@ -96,6 +95,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
                                                                 sheet.get_height() * self._sizeCo * yCo))
         self.image = self.frames[self.currentFrame]
         self.rect.size = self.image.get_size()
+        self.set_transparency(self.transparency)
 
     def set_transparency(self, coeff: int):
         self.transparency = coeff

@@ -1,4 +1,5 @@
 {
+  "type": "Dialog",
   "texture": "hud\\text_plane_teacher.jpg",
   "sounds": [],
   "buttons":  ["X линии отреза", "кол-во кнопок X", "кол-во кнопок Y", "[1-3] положение кнопок"]

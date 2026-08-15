@@ -79,17 +79,16 @@ class Manager(object):
     def choose_scene(self, scene="menu"):
         if self.scene:
             self.scene.q.clear()
-            self.scene.music.stop()
             for obj in self.scene.objects.values():
                 for sound in obj.sounds.values():
-                    sound.stop()
+                    if sound: sound.stop()
         if not self.scenes[scene]:
             self.scenes[scene] = self.sceneCreator.load_scene(scene)
         self.scene = self.scenes[scene]
-        self.scene.music.play(-1)
+        self.scene.objects["fon"].sounds["music"].play(-1)
         self.choose_resolution(self.screen, self.sceneCreator.screen.get_size())
-        for obj in self.scene.objects.values():
-            obj.set_transparency(obj.transparency)
+        """for obj in self.scene.objects.values():
+            obj.set_transparency(obj.transparency)"""
 
     def choose_resolution(self, screen, oldRes):
         self.screen = screen
@@ -97,7 +96,6 @@ class Manager(object):
         screenW, screenH = screen.get_width(), screen.get_height()
         wPercent, hPercent = screenW / oldRes[0], screenH / oldRes[1]
         self.localSettings["resolution"] = [screenW, screenH]
-        self.scene.fon.update((wPercent, hPercent))
         for obj in self.scene.objects.values():
             obj.update((wPercent, hPercent))
 
@@ -108,6 +106,6 @@ class Manager(object):
             self.localSettings["volume"] = 1
         else:
             self.localSettings["volume"] = 0
-        self.scene.music.set_volume(self.localSettings["volume"])
+        self.scene.objects["fon"].sounds["music"].set_volume(self.localSettings["volume"])
         """for obj in self.scene.objects:
             obj.sounds.set_volume(self.local_settings["volume"])"""

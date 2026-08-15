@@ -195,9 +195,12 @@ class Inventory(sprite.Sprite):
 class Picture(AnimatedSprite):
     def __init__(self, visual: dict, parameters: dict = None, events: dict = None, text: dict = None):
         super().__init__(**visual)
-        if parameters and "tName" in parameters: self.tName = parameters["tName"]  # техническое имя
-        else: self.tName = "fon"
+        self.tName = "fon"
+        self.sounds = {}
         self.clicks = 0
+        if parameters:
+            if "tName" in parameters: self.tName = parameters["tName"]  # техническое имя
+            if "sounds" in parameters: self.sounds = parameters["sounds"]
 
     def check_click(self, pos):
         if self.rect.x <= pos[0] <= self.rect.x + self.rect.w and \
@@ -237,7 +240,8 @@ class ObjectsCreator(object):
                             if k in ["type", "sounds", "buttons", "owners", "music", "name", "speech"]:
                                 parameters[k] = v
                             else: visual[k] = v
-                        if "type" in parameters: objectType = parameters["type"]
+                        if "type" not in parameters: parameters["type"] = "Picture"
+                        objectType = parameters["type"]
                         parameters["tName"] = currentDir
                         if "texture" in visual: visual["texture"] = self.render.set_texture(visual["texture"])
                         if "sounds" in parameters:

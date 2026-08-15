@@ -1,6 +1,10 @@
 {
   "name": "startButton",
+  "type": "Button",
   "texture": "alpha\\menu_settings_button.jpg",
+  "size_co": 1,
+  "top_left": [800, 700],
+  "anim_cut": [3, 1],
   "sounds": ["indeec.mp3"],
   "speech": ["1", "menuFont"]
 }

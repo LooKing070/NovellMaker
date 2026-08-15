@@ -1,8 +1,5 @@
 {
-  "scene_type": "baseScene",
-  "fon": ["mrWhiteO.jpg"],
-  "music": "uuuu_ch_fon.mp3",
-  "objects": [
-     ["start_button", "Button"]
-  ]
+  "texture": "bg\\fon_settings.jpg",
+  "size_co": 2,
+  "music": "uuuu_ch_fon.mp3"
 }

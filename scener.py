@@ -10,12 +10,10 @@ class Scene:
     def __str__(self):
         return self.sceneName
 
-    def __init__(self, sceneName, screen, fon, music, objects, script: list):
+    def __init__(self, sceneName, screen, objects, script: list):
         self.sceneName = sceneName
         self.screen = screen
         self.screenSize = self.screen.get_width(), self.screen.get_height()
-        self.fon = fon
-        self.music = music
         self.script = script  # [[obj, [event]], [obj, [event]], ]
         self.action = 0
         self.plotScore = 0
@@ -49,7 +47,6 @@ class Scene:
         return result
 
     def show(self):  # Возвращает текущие действия
-        self.fon.draw(self.screen)
         if self.q:
             if isinstance(self.q[0], list):
                 if self.q[0][0] == "sa&":
@@ -110,24 +107,24 @@ class SceneCreator(object):
         self.screen = screen
         self.objectsCreator = ObjectsCreator()
         self.sounder = Sounder()
-        self.scenes = {"baseScene": Scene}
+        self.scenes = {"baseScene": Scene, "conversation": Scene, "activity": Scene}
 
     def load_scene(self, sceneName: str = "menu"):
-        fon = None
-        music = None
+        music = {}
         objects = []
         script = []
         sceneType = "conversation"
         path = os.path.join(self.path, sceneName)
         with open(os.path.join(path, "parameters.json"), 'r', encoding="utf-8") as par_file:
             file = dict(json.load(par_file).items())
-            if len(file) > 0:
-                if file["type"] in ["conversation", "activity", "baseScene"]:
-                    sceneType = file.pop("type")
-                    music = self.sounder.load_fon_music(file.pop("music"))
-                    if "texture" in file: file["texture"] = self.objectsCreator.render.set_texture(file["texture"])
-                    fon = self.objectsCreator.objectTypes["Picture"](file)
-                    objects.append(fon)
+            if "type" not in file: file["type"] = "baseScene"
+            if file["type"] in ["conversation", "activity", "baseScene"]:
+                sceneType = file.pop("type")
+                music["sounds"] = {"music": self.sounder.load_fon_music(file.pop("music"))}
+                if "texture" in file: file["texture"] = self.objectsCreator.render.set_texture(file["texture"])
+                fon = self.objectsCreator.objectTypes["Picture"](file, music)
+                objects.append(fon)
+            # print(F"ERROR: PARAMETERS ARE NOT CORRECT IN SCENE {sceneName}")
 
         objects += self._load_objects(path)
         with open(os.path.join(path, "script.txt"), 'r', encoding="utf-8") as scr_file:
@@ -150,7 +147,7 @@ class SceneCreator(object):
                         action = []
                     case other:
                         pass
-        return self.scenes[sceneType](sceneName, self.screen, fon, music, objects, script)
+        return self.scenes[sceneType](sceneName, self.screen, objects, script)
 
     def _load_objects(self, path: str):  # Загрузка объектов (кнопок) в этой сцене
         objects = []
