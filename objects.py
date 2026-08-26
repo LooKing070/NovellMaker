@@ -110,9 +110,8 @@ class Actor(Button):
             for i in range(0, len(self.events[event]), 2):
                 result += ["sa&", self.events[event][i], self.name, self.text[self.events[event][i+1]],
                            self.textFonts[self.events[event][i+1]] if self.events[event][i+1] in self.textFonts else None]
-        """elif "plot_" in event:
-            self.plotScore += self.events[event]
-            result = self.tName"""
+        elif "plot_" in event:
+            result = ["pl&", self.events[event]]
         return result
 
 

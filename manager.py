@@ -62,9 +62,10 @@ class Manager(object):
         for button in self.scene.objects.values():
             self.check_action(button.check_click(pos))
 
-    def check_action(self, action):
+    def check_action(self, action):  # обработка результатов действий
         if action == -1:  # если по скрипту
             action = self.scene.continue_script()
+            print(action)
             if isinstance(action, str) and action[:3] == "lo&":
                 self.choose_scene(action[3:])
             elif isinstance(action, list):
@@ -75,6 +76,11 @@ class Manager(object):
             for a in action:
                 if a:
                     self.scene.q.append(a)
+
+    def game_cycle(self):
+        if self.scene.show():
+            if self.scene.q[0][:3] == "lo&":
+                self.choose_scene(self.scene.q[0][3:])
 
     def choose_scene(self, scene="menu"):
         if self.scene:

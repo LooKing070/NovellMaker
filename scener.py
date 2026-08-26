@@ -23,26 +23,27 @@ class Scene:
             self.objects[obj.tName] = obj
         self.result = "PAUSED"
 
-    def continue_script(self):
+    def continue_script(self):  # выполнение скрипта
         result = ''
         if len(self.script) > self.action:
             obj, event = self.script[self.action]
+
             if obj in self.objects:
                 if type(event) == str:
                     result = self.objects[obj].do(event)
-                elif event[0] == '$':  # блок с выбором действия персонажем
+                elif event[0] == '$':  # блок с выбором действия исходя из сюжета
                     for i in range(1, len(event), 2):
-                        if event[i] <= self.objects[obj].plotScore:
+                        if event[i] <= self.plotScore:
                             result = self.objects[obj].do(event[i + 1])
                             break
-                print(result)
-                self.action += 1
-            elif event[0] == '&':  # хз
+
+            elif event[0] == '&':  # блок одновременного выполнения ивентов разными персонажами
                 for i in range(1, len(event), 2):
                     result = self.objects[event[i]].do(event[i + 1])
-                self.action += 1
-                print(result)
+
             else: print(f"ERROR: OBJECT '{obj}' NOT FOUND. ERROR BLOCK - {self.action + 1}")
+            self.action += 1
+
         else: print("THE ACTION ENDED IN THE SCENE")
         return result
 
@@ -52,6 +53,8 @@ class Scene:
                 if self.q[0][0] == "sa&":
                     self.objects[self.q[0][1]].do(self.q[0][2:])
                     self.q[0].remove("sa&")
+                elif self.q[0][0] == "pl&":
+                    self.plotScore += self.q[0][1]
                 elif not self.objects[self.q[0][0]].runAnim:
                     self.q.pop(0)
             # print(self.q)

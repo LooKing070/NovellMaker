@@ -28,9 +28,7 @@ def main():
     running = True
     while running:
         vScreen.fill((0, 0, 0))
-        if manager.scene.show():
-            if manager.scene.q[0][:3] == "lo&":
-                manager.choose_scene(manager.scene.q[0][3:])
+        manager.game_cycle()
         for event in pygame.event.get():
             if event_check(manager, pygame.mouse.get_pos(), event) or event.type == pygame.QUIT:
                 running = False
