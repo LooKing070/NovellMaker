@@ -24,7 +24,7 @@ class Scene:
         self.result = "PAUSED"
 
     def continue_script(self):  # выполнение скрипта
-        result = ''
+        result = []
         if len(self.script) > self.action:
             obj, event = self.script[self.action]
 
@@ -39,7 +39,7 @@ class Scene:
 
             elif event[0] == '&':  # блок одновременного выполнения ивентов разными персонажами
                 for i in range(1, len(event), 2):
-                    result = self.objects[event[i]].do(event[i + 1])
+                    result.append(self.objects[event[i]].do(event[i + 1]))
 
             else: print(f"ERROR: OBJECT '{obj}' NOT FOUND. ERROR BLOCK - {self.action + 1}")
             self.action += 1
@@ -47,26 +47,39 @@ class Scene:
         else: print("THE ACTION ENDED IN THE SCENE")
         return result
 
+    def check_action(self, action):  # обработка результатов действий
+        if action:
+            print(action)
+            for a in action:
+                if isinstance(a, list): self.check_action(a)
+                elif a:
+                    if a == "sa&":
+                        for i in range(0, len(action), 5):
+                            self.q.append(action[i:i+5])
+                        break
+                    else:  # если в списке действия строки
+                        self.q.append(action)
+
     def show(self):  # Возвращает текущие действия
         if self.q:
-            if isinstance(self.q[0], list):
-                if self.q[0][0] == "sa&":
-                    self.objects[self.q[0][1]].do(self.q[0][2:])
-                    self.q[0].remove("sa&")
-                elif self.q[0][0] == "pl&":
-                    self.plotScore += self.q[0][1]
-                elif not self.objects[self.q[0][0]].runAnim:
-                    self.q.pop(0)
-            # print(self.q)
+            if self.q[0][0] == "sa&":
+                self.objects[self.q[0][1]].do(self.q[0][2:])
+                self.q[0].remove("sa&")
+            elif self.q[0][0] == "pl&":
+                self.plotScore += self.q[0][1]
+                self.q.pop(0)
+            elif not self.objects[self.q[0][0]].runAnim or not self.objects[self.q[0][0]].transparency:
+                self.q.pop(0)
+            print(self.q)
         for obj in self.objects.values():
             if obj.transparency:
                 obj.draw(self.screen)
                 obj.do_anim()
             if obj.runAnim:
-                if obj.tName not in self.q:
-                    self.q.append(obj.tName)
-            elif obj.tName in self.q:
-                self.q.remove(obj.tName)
+                if [obj.tName] not in self.q:
+                    self.q.append([obj.tName])
+            elif [obj.tName] in self.q:
+                self.q.remove([obj.tName])
         return self.q
 
 

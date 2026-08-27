@@ -1,5 +1,5 @@
 teacher - $
-0 - sdut_bruh
+10 - sdut_bruh
 $
 ЭСфсЭЭ - &
 text_panel_t - tran_show
@@ -8,9 +8,12 @@ teacher - say_hay
 teacher - say_hello
 teacher - plot_1
 text_panel_t - tran_hide
+teacher - $
+1 - sdut_aahh
+$
 сысвс
 ЭСфсЭЭ - &
-teacher - sdut_bruh
 start_button - sdut_i
 start_button - play_anim
+start_button - load_scene
 &

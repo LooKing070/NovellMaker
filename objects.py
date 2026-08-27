@@ -28,30 +28,30 @@ class Button(AnimatedSprite):
             return self.do()
         return False
 
-    def do(self, event="on_click"):
-        result = ''
+    def do(self, event="on_click") -> list:
+        result = []
         if event in self.events:
             if "on_" in event:
                 result = [self.do(eS) for eS in self.events[event]]
             elif "tran_" in event:
                 self.set_transparency(self.events[event])
-                result = self.tName
+                result = [self.tName]
             elif "play_" in event:
                 self.update(animaCount=self.events[event][0])
-                result = self.tName
+                result = [self.tName]
             elif "sdut_" in event:
                 self.sounds[self.events[event]].play(0)
-                result = self.tName
+                result = [self.tName]
             else:
                 result = self._do(event)
         else:
             print(self.tName, "ERROR: THERE IS NO SUCH EVENT")
         return result
 
-    def _do(self, event=""):
-        result = ''
+    def _do(self, event="") -> list:
+        result = []
         if "load_" in event:
-            result = "lo&" + self.events[event]
+            result = ["lo&", self.events[event]]
         return result
 
     def update(self, size=(), animaCount=1):
@@ -73,14 +73,14 @@ class VideoPlayer:
     def __str__(self):
         return "VidPlr"
 
-    def do(self, event="play_video"):
-        result = ''
+    def do(self, event="play_video") -> list:
+        result = []
         if "play_" in event:
             Rendering.play_video(self.screen, self.events[event])
-            result = self.tName
+            result = [self.tName]
         elif "sdut_" in event:
             self.sounds[self.events[event]].play(0)
-            result = self.tName
+            result = [self.tName]
         else:
             print(str(self), "ERROR: THERE IS NO SUCH EVENT")
         return result
@@ -103,10 +103,11 @@ class Actor(Button):
     def __str__(self):
         return "Actor"
 
-    def _do(self, event=""):
-        result = ''
+    def _do(self, event="") -> list:
+        result = []
         if "say_" in event:
             result = []
+            # result = действие, объект совершающий действие (текстовая панель), имя говорящего, текст, шрифт
             for i in range(0, len(self.events[event]), 2):
                 result += ["sa&", self.events[event][i], self.name, self.text[self.events[event][i+1]],
                            self.textFonts[self.events[event][i+1]] if self.events[event][i+1] in self.textFonts else None]
@@ -134,10 +135,10 @@ class Dialog(TextPlane):
             return self.do("paus_")
         return False
 
-    def do(self, event):
-        result = ''
+    def do(self, event) -> list:
+        result = []
         if isinstance(event, list):
-            result = self.tName
+            result = [self.tName]
             self.runAnim = True
             self.set_text(*event)
         elif event in self.events:
@@ -145,10 +146,8 @@ class Dialog(TextPlane):
                 result = [self.do(eS) for eS in self.events[event]]
             elif "tran_" in event:
                 self.set_transparency(self.events[event])
-                result = self.tName
             elif "paus_" in event:
                 self.runAnim = not self.runAnim
-                result = self.tName
             else:
                 pass
                 # result = self._do(event)
@@ -182,8 +181,8 @@ class Inventory(sprite.Sprite):
             return self.do("choose_")
         return False
 
-    def do(self, event=""):
-        result = ''
+    def do(self, event="") -> list:
+        result = []
         if "add_" in event:
             pass
         elif "del_" in event:
