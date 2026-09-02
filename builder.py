@@ -8,8 +8,11 @@ def get_base_path():
     В режиме разработки: папка со скриптом.
     В режиме сборки: папка с .exe файлом.
     """
-    if getattr(sys, 'frozen', False):
-        # Запущено из скомпилированного .exe
+    if "__compiled__" in globals():
+        # Запущено из скомпилированного Nuitka EXE
+        return os.path.dirname(os.path.abspath(sys.argv[0]))
+    elif getattr(sys, 'frozen', False):
+        # Запущено из PyInstaller-сборки (на будущее)
         return os.path.dirname(sys.executable)
     else:
         # Запущено из IDE / исходного кода
