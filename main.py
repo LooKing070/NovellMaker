@@ -28,13 +28,16 @@ def main():
     running = True
     while running:
         vScreen.fill((0, 0, 0))
-        manager.game_cycle()
-        for event in pygame.event.get():
-            if event_check(manager, pygame.mouse.get_pos(), event) or event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.VIDEORESIZE:
-                vScreen = pygame.transform.scale(vScreen, event.size)
-                manager.choose_resolution(vScreen, windowRes)
+        try:
+            manager.game_cycle()
+            for event in pygame.event.get():
+                if event_check(manager, pygame.mouse.get_pos(), event) or event.type == pygame.QUIT:
+                    running = False
+                elif event.type == pygame.VIDEORESIZE:
+                    vScreen = pygame.transform.scale(vScreen, event.size)
+                    manager.choose_resolution(vScreen, windowRes)
+        except:
+            pass
         screen.blit(vScreen, (0, 0))
         pygame.display.flip()
         clock.tick(fps)
